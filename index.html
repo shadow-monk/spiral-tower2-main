@@ -2,14 +2,13 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>スパイラルタワー 2</title>
-<link rel="stylesheet" href="css/style.css?v=20261123b">
+<link rel="stylesheet" href="css/style.css?v=1633">
 </head>
-<body class="game-body">
+<body class="game-body" style="margin:0 !important; padding:0 !important; background-color:#0f172a !important;">
 
-  <div class="master-wrapper">
-    <div class="game-container">
+  <div class="master-wrapper" style="width:100% !important; max-width:600px !important; margin:0 auto !important; padding:15px !important; box-sizing:border-box !important;">
+    <div class="game-container" style="width:100% !important; box-sizing:border-box !important;">
         
 <!-- 🏰 ゴシック＆魔導フレーム化した外枠（sq-board） -->
 <div id="sq-board" style="
@@ -18,6 +17,7 @@
     outline: 2px solid #eab308 !important;
     outline-offset: -8px;
     border-radius: 24px !important;
+    padding: 20px 14px 25px 14px !important;
     text-align: center !important;
     box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(234, 179, 8, 0.25) !important;
     width: 100% !important;
@@ -30,7 +30,7 @@
         <button onclick="toggleMute()" id="btn-mute" style="background:#0f172a; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:6px 14px; font-size:0.9rem; font-weight:800; cursor:pointer; font-family:monospace;">🔊 音声: ON</button>
     </div>
 
-    <div id="scr-start" style="position: relative; width: 100%; max-height: 100%; box-sizing: border-box; padding: 25px 10px 0 10px; text-align: center;">
+    <div id="scr-start" style="position: relative; width: 100%; height: 490px; box-sizing: border-box; padding: 25px 10px 0 10px; text-align: center;">
         
         <!-- 👑 タイトルエリア（上部） -->
         <div style="color: #a5b4fc; font-size: 1.05rem; font-weight: 900; letter-spacing: 0.4em; margin-bottom: 6px; text-shadow: 0 0 12px rgba(99,102,241,0.9); font-family: monospace;">
@@ -79,7 +79,7 @@
                     </div>
                 </div>
 
-                <div id="eff-scr" style="background-color:#0f172a; border:4px solid #334155; border-radius:24px 24px 0 0; width:100%; position:relative; overflow:hidden; box-sizing:border-box !important;">
+                <div id="eff-scr" style="background-color:#0f172a; border:4px solid #334155; border-radius:24px 24px 0 0; height:350px; width:100%; position:relative; overflow:hidden; box-sizing:border-box !important;">
                     
                     <div id="cutin-bar">
                          <div class="cutin-text">🧙‍♂️ クリティカルヒット！！</div>
@@ -198,7 +198,6 @@
 </div>
         </div>
     </div>
-  </div>
 
    <div id="dev-console-window" style="margin-top:25px; width:100%; background:#0b0f19; border:2px solid #334155; border-radius:16px; padding:15px; text-align:left; box-sizing:border-box;">
         <div style="font-size:0.9rem; font-weight:800; color:#94a3b8; margin-bottom:10px; display:flex; justify-content:space-between;">
