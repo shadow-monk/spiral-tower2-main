@@ -1,0 +1,1747 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   👹 1. 10大魔物・画像不要 【クリックバリア完全破砕版】演出大要塞 (Ver 1.45)
+   ========================================================================== */
+
+/* ─── 🛡️ 全体共通：戦闘画面（eff-scr）の背景白化＆クリックガード破壊 ─── */
+#eff-scr {
+    background-color: #0f172a !important; 
+    position: relative;
+    pointer-events: none; /* 下のコマンドボタンへ100%クリックを貫通させる */
+}
+
+/* ==========================================================================
+   🧪 1. 新・スライム特殊技「shoot-acid」：緑の強酸泥を投げつける演出
+   ========================================================================== */
+
+/* ── 🟢 泥の塊本体：画面右（敵）から拡大しながら、左（プレイヤー）へビューッと大投擲 ── */
+#eff-scr.shoot-acid::after {    content: "🟢"; 
+    position: absolute;     top: 50%;     left: 75%; /* 敵スプライトの初期位置付近 */
+    z-index: 9999;     opacity: 0;    font-size: 30px; /* 泥の基本サイズ */
+    text-shadow: 0 0 15px #9ac522, 0 0 30px #801915;
+    filter: hue-rotate(-20deg) saturate(2);     pointer-events: none;
+    transform-origin: center center;    animation: tossAcidBlob 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes tossAcidBlob {    0% {         left: 75%;         top: 45%;        transform: scale(0.3) rotate(0deg);         opacity: 0;     }
+    15% {         opacity: 1;     }
+    /* 🚀 放物線を描きながら、プレイヤーめがけて巨大化しつつぶっ飛んでいく！ */
+    50% {
+        top: 20%; /* ガッと上空に持ち上がって投げる感じを再現 */
+        transform: scale(2.0) rotate(180deg);
+    }
+    /* 💥 70%（約0.5秒後）でプレイヤーの顔面にジャストミート！ */
+    70% { 
+        left: 14%; 
+        top: 48%;
+        transform: scale(3.5) rotate(360deg); 
+        opacity: 1;
+        filter: blur(0px);
+    }
+    /* 🤢 激突した瞬間に、泥の塊がベチャッと破裂して四方に飛び散り、霧散する */
+    100% { 
+        left: 10%; 
+        top: 50%;
+        transform: scale(6.0) rotate(420deg); 
+        opacity: 0; 
+        filter: blur(12px); /* 飛び散って溶けるブラー */
+    }
+}
+
+/* ── ── 2. 画面連動：泥が顔面に激突した瞬間に、画面全体がねばっと強酸色に染まる ── ── */
+#eff-scr.shoot-acid {
+    animation: acidMeltBackground 0.9s ease-out forwards;
+}
+
+@keyframes acidMeltBackground {
+    0%, 45% { background-color: rgba(34, 197, 94, 0); }
+    /* 💥 泥の塊が激突した瞬間（45%〜50%）に、画面全体が視界不良のドロドロ緑に染まる！ */
+    55% { background-color: rgba(34, 197, 94, 0.75); filter: blur(0px); }
+    75% { background-color: rgba(21, 128, 61, 0.45); filter: blur(6px); } /* じわっと強酸が溶かす */
+    100% { background-color: rgba(0, 0, 0, 0); filter: blur(0px); }
+}
+
+
+/* ──  泥の塊本体：画面右（敵）から拡大しながら、左（プレイヤー）へビューッと大投擲 ── */
+#eff-scr.shoot-yellow::after {
+    content: "🟡";     position: absolute; 
+    top: 50%;     left: 75%; /* 敵スプライトの初期位置付近 */
+    z-index: 9999;     opacity: 0;    font-size: 20px; /* 泥の基本サイズ */
+    /* 毒々しいヘドロ緑のオーラを纏わせ、形をドロッと歪ませる */
+    text-shadow: 0 0 15px #9ac522, 0 0 30px #801915;    filter: hue-rotate(-20deg) saturate(2); 
+    pointer-events: none;    transform-origin: center center;
+    animation: tossyellow 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;}
+@keyframes tossyellow {    0% {         left: 75%;         top: 45%;        transform: scale(0.3) rotate(0deg);         opacity: 0;     }
+    15% {         opacity: 1;     }
+    50% {        top: 35%;         transform: scale(2.0) rotate(180deg);   }
+    70% {         left: 14%;         top: 40%;        transform: scale(3.5) rotate(360deg);         opacity: 1;        filter: blur(0px);    }
+    100% {         left: 10%;         top: 50%;        transform: scale(1.0) rotate(420deg);         opacity: 0;         filter: blur(90px);    }}
+#eff-scr.shoot-ac {    animation: acidMelt2 0.9s ease-out forwards;}
+
+@keyframes acidMel2 {    0%, 45% { background-color: rgba(34, 197, 94, 0); } 
+    55% { background-color: rgba(199, 202, 29, 0.75); filter: blur(0px); }    75% { background-color: rgba(189, 192, 8, 0.45); filter: blur(6px); } /* じわっと強酸が溶かす */
+    100% { background-color: rgba(204, 207, 36, 0); filter: blur(0px); }}
+
+.blob-grow {
+    animation: blobAnatomyChange 0.6s ease-in-out forwards !important;
+}
+
+
+/* ==========================================================================
+   🕸️ 2階：ブラッドスパイダー 特殊技「spider-web-shoot」完全リフォーム
+   ========================================================================== */
+
+/* ── 1. 蜘蛛の巣本体：右から拡大しながら飛来 ➔ 激突 ➔ 超巨大化して2秒包む ── */
+#eff-scr.spider-web-shoot::after {
+    content: "🕸️"; 
+    position: absolute; 
+    top: 25%; 
+    left: 75%; 
+    z-index: 9999; 
+    opacity: 0;
+    font-size: 40px; /* 初期サイズ */
+    text-shadow: 0 0 20px rgba(168, 85, 247, 0.6); /* 妖しい紫の毒オーラ */
+    pointer-events: none;
+    transform-origin: center center;
+    animation: megaWebCinema 2.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+@keyframes megaWebCinema {
+    /* 【フェーズ1：画面右からプレイヤーめがけて大回転・拡大しながら飛来】 */
+    0% {         left: 75%;         top: 25%;        transform: scale(0.2) rotate(0deg);         opacity: 0;     }
+    10% {         opacity: 1;     }    25% {         left: 12%;         top: 35%;        transform: scale(2.5) rotate(360deg);         opacity: 1;    }
+       26% {        left: 10%;        top: 32%;        transform: scale(4.5) rotate(360deg);         filter: blur(0px);        opacity: 1;    }
+    90% {        left: 10%;        top: 32%;        transform: scale(4.8) rotate(370deg);         filter: blur(0px);        opacity: 1;    }
+    100% {         left: 10%;        top: 32%;        transform: scale(6.0) rotate(380deg);         opacity: 0;         filter: blur(15px);     }}
+
+#eff-scr.spider-web-shoot ~ #scr-battle #p-sprite-container,
+#eff-scr.spider-web-shoot + #scr-battle #p-sprite-container,
+.spider-web-shoot #p-sprite-container {
+    animation: playerStunBindShock 2.5s ease-in-out;}
+
+@keyframes playerStunBindShock {
+    0% { transform: translate(0, 0); filter: none; }
+    
+    /* 💥 激突の瞬間（25%付近）からガタガタガタッ！と猛烈な糸の衝撃シェイク */
+    22% { transform: translate(0, 0); filter: none; }
+    24% { transform: translate(-15px, -8px); filter: brightness(2) saturate(0); } /* 一瞬白化 */
+    26% { transform: translate(15px, 8px); filter: brightness(1.5) cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+    28% { transform: translate(-12px, 5px); }
+    30% { transform: translate(12px, -5px); }
+    32% { transform: translate(-8px, 3px); }
+    34% { transform: translate(8px, -3px); }
+    36% { transform: translate(-4px, 1px); }
+    38% { transform: translate(4px, -1px); }
+    
+    /* 🔒 その後、蜘蛛の巣に包まれている2秒間は「緊縛の硬直」を表現するため、怪しく静止 */
+    40% { transform: translate(0, 0) scale(0.95); filter: contrast(1.3) sepia(0.5) hue-rotate(240deg); } /* 紫がかった拘束色 */
+    90% { transform: translate(0, 0) scale(0.95); filter: contrast(1.3) sepia(0.5) hue-rotate(240deg); }
+    
+    /* 解放 */
+    100% { transform: translate(0, 0) scale(1); filter: none; }
+}
+
+/* 🛡️ 3階：スケルトンナイト 【妖盾シールド】 */
+#eff-scr.anim-skelton-shield::after {
+    content: "🛡️"; font-size: 40px; position: absolute; top: 45%; right: 32%; width: 60px; height: 90px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.4) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.4) 25%, transparent 25%);
+    background-size: 15px 15px; border: 4px dashed #ffffff; border-radius: 8px; box-shadow: 0 0 20px #ffffff;
+    display: flex; align-items: center; justify-content: center; z-index: 45; pointer-events: none;
+    animation: spawnSkeletonShield 1.0s ease-in-out forwards;
+}
+@keyframes spawnSkeletonShield {
+    0% { transform: scale(0) rotate(-45deg); opacity: 0; }
+    20%, 80% { transform: scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: scale(0) translateY(20px); opacity: 0; }
+}
+
+/* 🌪️ 4階：ハーピィ 【超音波】 */
+#eff-scr.anim-harpy-storm::after {
+    content: ""; position: absolute; top: 50%; left: 70%; width: 10px; height: 10px;
+    border: 3px solid rgba(255, 255, 255, 0.8); border-radius: 50%; z-index: 50; pointer-events: none;
+    box-shadow: 0 0 10px rgba(255,255,255,0.5), inset 0 0 10px rgba(255,255,255,0.5);
+    animation: harpySonicWave 0.6s ease-out forwards;
+}
+@keyframes harpySonicWave {
+    0% { width: 10px; height: 10px; top: 50%; left: 70%; opacity: 1; }
+    100% { width: 250px; height: 250px; top: 15%; left: 0%; opacity: 0; transform: skewX(-15deg); }
+}
+
+/* 🧱 5階：ロックゴーレム 【岩石大投擲】 */
+#eff-scr.anim-golem-earthquake::after {
+    content: ""; position: absolute; width: 60px; height: 50px; background: #78350f;
+    border: 4px solid #451a03; border-radius: 6px; box-shadow: inset -10px -10px 0 #451a03, 0 0 25px rgba(249,115,22,0.5);
+    z-index: 50; pointer-events: none; animation: boulderDrop 0.8s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+@keyframes boulderDrop {
+    0% { top: -60px; left: 60%; transform: rotate(0deg); }
+    45% { top: 40%; left: 15%; transform: rotate(180deg) scale(1.2); }
+    55% { top: 45%; left: 12%; transform: rotate(200deg) scale(1.4); filter: brightness(2); }
+    100% { top: 50%; left: 10%; transform: rotate(240deg) scale(0); opacity: 0; filter: blur(10px); }
+}
+#eff-scr.anim-golem-earthquake {
+    animation: golemScreenShake 0.8s ease-in-out;
+}
+@keyframes golemScreenShake {
+    0%, 35% { transform: translateY(0); }
+    40%, 60%, 80% { transform: translateY(-15px); background-color: #292524; }
+    50%, 70%, 90% { transform: translateY(15px); background-color: #0f172a; }
+    100% { transform: translateY(0); }
+}
+
+/* ⚡ 6階：ガーゴイル 【攻撃魔法陣】 */
+#eff-scr.anim-gargoil-charge::after {
+    content: ""; position: absolute; top: 25%; right: 3%; width: 170px; height: 170px;
+    border: 5px double #f63b3b; border-radius: 50%; box-shadow: 0 0 30px #beda72, inset 0 0 30px #3b82f6;
+    z-index: 45; pointer-events: none; animation: gargoilBarrier 1.0s ease-in-out forwards;
+}
+@keyframes gargoilBarrier {
+    0% { transform: scale(0); opacity: 0; }
+    30%, 70% { transform: scale(1); opacity: 0.8; background-color: rgba(59,130,246,0.15); }
+    50% { opacity: 0.4; transform: scale(1.05); }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+/* 🍄 7階：マイコニド 【胞子拡散】 */
+#eff-scr.anim-myconid-spore #p-sprite-container::after {
+    content: "••• •• •••• •• •••"; font-size: 24px; font-weight: 900; color: #eab308;
+    text-shadow: 0 0 8px #ca8a04, 20px -15px 0 #eab308, -15px 25px 0 #04ca0e, 30px 20px 0 #ca8a04;
+    letter-spacing: 4px; position: absolute; top: 10%; left: 10%; width: 90%; height: 90%; z-index: 55; opacity: 0;
+    filter: drop-shadow(0 0 5px #000); pointer-events: none; animation: playerGetSpores 0.9s ease-in-out forwards;
+}
+@keyframes playerGetSpores {
+    0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+    30%, 80% { opacity: 1; transform: scale(1.1) rotate(5deg); filter: sepia(1) saturate(2); }
+    100% { opacity: 0; transform: scale(1) rotate(0deg); }
+}
+
+/* 👻 8階：ファントム 【エナジードレイン】 */
+#eff-scr.anim-phantom-curse::after {
+    content: "⛧\A⸸\A☠"; white-space: pre; line-height: 0.9; font-size: 32px; color: #f43f5e !important; 
+    text-align: center; position: absolute; top: 32%; left: 16%; width: 100px; height: 100px;
+    border: 3px dashed #a855f7; border-radius: 50%; pointer-events: none;
+    background: radial-gradient(circle, rgba(168,85,247,0.2) 30%, transparent 70%); z-index: 99; opacity: 0; 
+    filter: drop-shadow(0 0 10px #ef4444); animation: darkDrainSign 1.2s ease-in-out forwards;
+}
+@keyframes darkDrainSign {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    20% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+    40% { transform: scale(1.1) rotate(200deg); filter: brightness(2); }
+    80% { transform: scale(1.4) rotate(360deg); opacity: 0.8; }
+    100% { transform: scale(2.5) translateY(-40px); opacity: 0; filter: blur(6px); }
+}
+
+/* 👁️ 9階：エビルアイ 【魔力封印邪眼】 */
+#eff-scr.anim-evileye-mute::after {
+    content: ""; position: absolute; top: 52%; right: 20%; width: 0%; height: 24px;
+    background: linear-gradient(180deg, #ffffff 0%, #ef4444 30%, #b91c1c 70%, #ffffff 100%);
+    box-shadow: 0 0 30px #ef4444, 0 0 50px #f43f5e; border-radius: 12px; z-index: 50;
+    transform-origin: right center; pointer-events: none; animation: shootEyeLaser 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+@keyframes shootEyeLaser {
+    0% { width: 0%; left: 75%; opacity: 1; }
+    25% { width: 65%; left: 12%; opacity: 1; }
+    50% { width: 65%; left: 12%; filter: brightness(2); transform: scaleY(1.3); }
+    75% { width: 65%; left: 12%; opacity: 0.8; transform: scaleY(0.8); }
+    100% { width: 0%; left: 12%; opacity: 0; }
+}
+
+/* 🐉 10階：カリスドラゴン 【カタストロフィブレス】 */
+#eff-scr.anim-dragon-breath::after {
+    content: ""; position: absolute; width: 190px; height: 90px; pointer-events: none;
+    background: radial-gradient(circle, #000000 40%, #701a75 70%, #f43f5e 95%, transparent);
+    border-radius: 50%; box-shadow: 0 0 40px #df127a, 0 0 70px #ef4444; z-index: 50;
+    animation: grandDarkFlare 1.2s ease-in forwards;
+}
+@keyframes grandDarkFlare {
+    0% { top: 35%; left: 50%; transform: scale(0.2) rotate(0deg); opacity: 1; }
+    40% { top: 40%; left: 30%; transform: scale(1.5) rotate(180deg); }
+    75% { top: 45%; left: 10%; transform: scale(2.2) rotate(360deg); opacity: 1; filter: blur(0); }
+    100% { top: 45%; left: 5%; transform: scale(4); opacity: 0; filter: blur(15px); background: #ffffff; }
+}
+
+/* ==========================================================================
+   👹 前半戦・5大モンスター特殊技 【完全覚醒・画像不要CSS演出大要塞】
+   ========================================================================== */
+#eff-scr.orchjel::after {content: ".";position: absolute;     top: 10%;     left: 75%; 
+    /* 🟡 絵文字（font-size: 25px）の代わりに、純粋な25pxの黄色い円を作ります */    width: 95px;    height: 45px;    background: #eab308; /* 黄色（またはお好みの色） */
+    border-radius: 50%;  /* 完全な丸にする設定 */    filter: blur(15px);    box-shadow:         -40px  20px 75px #ddda0b,  /* 2個目の円 */
+        -80px -20px 55px #eab308,  /* 3個目の円 */       -50px  30px 65px #493804,  /* 2個目の円 */   -85px -25px 35px #cea21f,  /* 3個目の円 */        -120px 40px 25px #dceb15;  /* 4個目の円 */
+    z-index: 10000;     pointer-events: none;     opacity: 0;    animation: bloodBreathWave 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;}
+
+#eff-scr.poisongus::after {content: ".";position: absolute;     top: 95%;     left: 10%; 
+    /* 紫（font-size: 25px）の代わりに、純粋な25pxの黄色い円を作ります */
+    width: 95px;    height: 45px;    background: #9709cf; /* 黄色（またはお好みの色） */
+    border-radius: 50%;  /* 完全な丸にする設定 */    filter: blur(15px);    box-shadow:         -40px  20px 75px #cc44ee,  /* 2個目の円 */
+        -80px -20px 55px #5a1daa,  /* 3個目の円 */       -50px  30px 65px #9f0ccc,  /* 2個目の円 */
+        -85px -25px 35px #370372,  /* 3個目の円 */        -120px 40px 25px #7e4ecc;  /* 4個目の円 */
+    z-index: 10000;     pointer-events: none;     opacity: 0;    animation: poisonWave 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;}
+@keyframes poisonWave {
+    0% { left: 55%; top: 25%; transform: scale(0.5); opacity: 0; text-shadow: 0 0 0 transparent; }
+    20% { opacity: 1; }
+    70% {     left: 15%; top: 48%; transform: scale(4.0); opacity: 1;
+          text-shadow: -40px 20px 0 #991b1b, -80px -20px 0 #7f1d1d, -120px 40px 0 #dc2626, -160px -40px 0 #991b1b;    }
+    100% { left: 5%; top: 50%; transform: scale(5.5); opacity: 0; filter: blur(15px); }}
+    
+
+#eff-scr.whitebl::after {content: ".";position: absolute;     top: 10%;     left: 75%; 
+    /* 白色（font-size: 25px）の代わりに、純粋な25pxの黄色い円を作ります */
+    width: 95px;    height: 45px;    background: #eeece8; /* 黄色（またはお好みの色） */
+    border-radius: 50%;  /* 完全な丸にする設定 */    filter: blur(15px);    box-shadow:         -40px  20px 75px #a8a8a4,  /* 2個目の円 */
+        -80px -20px 55px #eeedec,  /* 3個目の円 */       -50px  30px 65px #d3d0c3,  /* 2個目の円 */
+        -85px -25px 35px #bebaab,  /* 3個目の円 */        -120px 40px 25px #70706d;  /* 4個目の円 */
+    z-index: 10000;     pointer-events: none;     opacity: 0;    animation: bloodBreathWave 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;}
+
+/* --------------------------------------------------------------------------
+   2. 🕷️ ブラックウィドウ：スパイダーニードル
+   -------------------------------------------------------------------------- */
+/* /// 2本の針が時間差で右上から超高速飛来 */
+#eff-scr.spider-needle::before,
+#eff-scr.spider-needle::after {
+    content: "///／ /／ "; position: absolute; z-index: 10000; font-size: 40px; pointer-events: none; opacity: 0;
+    filter: drop-shadow(0 0 10px #a855f7) hue-rotate(50deg);
+}
+#eff-scr.spider-needle::before { animation: needleShoot1 0.5s ease-in forwards; }
+#eff-scr.spider-needle::after { animation: needleShoot2 0.5s ease-in forwards; animation-delay: 0.2s; }
+@keyframes needleShoot1 {
+    0% { top: -10%; left: 110%; transform: rotate(-135deg) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 45%; left: 12%; transform: rotate(-135deg) scale(1.5); opacity: 1; }
+}
+@keyframes needleShoot2 {
+    0% { top: -20%; left: 120%; transform: rotate(-135deg) scale(0.5); opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 55%; left: 16%; transform: rotate(-135deg) scale(1.5); opacity: 1; }
+}
+/* 💥 激突の瞬間のドス赤黒いフラッシュ */
+#eff-scr.spider-needle { animation: darkRedFlash 0.9s ease-out forwards; }
+@keyframes darkRedFlash {
+    0%, 40% { background-color: rgba(0, 0, 0, 0); }
+    45%, 65% { background-color: rgba(53, 12, 233, 0.85); box-shadow: inset 0 0 100px #000; }
+    100% { background-color: rgba(0, 0, 0, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   3. 🩸 ブラッディボーン：毒血縛り
+   -------------------------------------------------------------------------- */
+/* 🤮 口から赤い毒血ブレスを大噴射 */
+#eff-scr.blood-poison-breath::after {
+    content: "🩸"; position: absolute; top: 40%; left: 75%; font-size: 20px; z-index: 10000; pointer-events: none; opacity: 0;
+    animation: bloodBreathWave 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes bloodBreathWave {
+    0% { left: 75%; top: 40%; transform: scale(0.5); opacity: 0; text-shadow: 0 0 0 transparent; }
+    20% { opacity: 1; }
+    70% {
+        left: 15%; top: 48%; transform: scale(4.0); opacity: 1;
+        text-shadow: -40px 20px 0 #991b1b, -80px -20px 0 #7f1d1d, -120px 40px 0 #dc2626, -160px -40px 0 #991b1b;
+    }
+    100% { left: 5%; top: 50%; transform: scale(5.5); opacity: 0; filter: blur(15px); }
+}
+/* 画面全体が血液の赤に染まり、ドロドロと崩れ落ちる */
+#eff-scr.blood-poison-breath { animation: bloodMeltBG 1.2s ease-in-out forwards; }
+@keyframes bloodMeltBG {
+    0% { background-color: rgba(0, 0, 0, 0); filter: contrast(1); }
+    30%, 70% { background-color: rgba(153, 27, 27, 0.75); filter: contrast(1.8) blur(2px); transform: translateY(5px); }
+    100% { background-color: rgba(0, 0, 0, 0); filter: contrast(1) blur(0px); transform: translateY(0); }
+}
+
+/* --------------------------------------------------------------------------
+   4. 🦅 バードレディ：ウィングトルネード
+   -------------------------------------------------------------------------- */
+/* 🌪️ 画面中央の暴風エフェクト */
+#eff-scr.wing-tornado-bg { animation: windStormBG 1.3s linear forwards; }
+@keyframes windStormBG {
+    0% { background-color: rgba(6, 182, 212, 0); box-shadow: inset 0 0 0 transparent; }
+    20%, 80% { background-color: rgba(6, 182, 212, 0.25); box-shadow: inset 0 0 100px rgba(255,255,255,0.4); }
+    100% { background-color: rgba(6, 182, 212, 0); box-shadow: inset 0 0 0 transparent; }
+}
+/* 🌀 主人公を巻き上げて真っ逆さまに落とす（プレイヤーのグラフィック自体をハック震動） */
+/* #eff-scr に wing-tornado-bg がついた時、同じボード内のプレイヤー要素を確実に補着する */
+#eff-scr.wing-tornado-bg ~ #scr-battle #p-sprite-container,
+#eff-scr.wing-tornado-bg ~ #scr-battle #p-sprite-graphic,
+#sq-board:has(.wing-tornado-bg) #p-sprite-graphic,
+#sq-board:has(.wing-tornado-bg) #p-sprite-container,
+.wing-tornado-bg #p-sprite-graphic {
+    animation: playerTornadoLift 1.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes playerTornadoLift {
+    0% { transform: translateY(0) rotate(0deg) scale(1); filter: none; }
+    
+    /* 20%〜50%: 高速3回転しながら上空へ打ち上げ */
+    20%, 50% { transform: translateY(-100px) rotate(1080deg) scale(0.7); filter: blur(2px) hue-rotate(90deg); }
+    
+    /* 65%: 地面へ叩き落とし直前（頭からの姿勢 rotate(1980deg) に反転） */
+    65% { transform: translateY(10px) rotate(1980deg) scale(1.2); filter: none; }
+    
+    /* 70%〜80%: 頭から激突の衝撃バウンド（逆さまの姿勢を維持） */
+    70% { transform: translateY(-25px) rotate(1980deg) scale(1); }
+    80% { transform: translateY(-8px) rotate(1980deg); }
+    
+    /* 100%: 頭から落ちた姿勢（Y=0, rotate(1980deg)＝上下逆さま）のまま着地静止！ */
+    100% { transform: translateY(0) rotate(1980deg) scale(1); filter: none; }
+}
+/* 💨 激突時の砂煙エフェクト（不透明度50%＆時計回り90度回転） */
+#eff-scr.wing-tornado-bg::before {
+    content: "🫧🫧";
+    position: absolute;
+    bottom: 5%;
+    left: 2%;
+    font-size: 80px;
+    z-index: 10009;
+    pointer-events: none;
+    opacity: 0;
+    animation: tornadoDustImpact 1.3s ease-out forwards;
+}
+
+@keyframes tornadoDustImpact {
+    0%, 70% { 
+        opacity: 0; 
+        transform: scale(0.9) rotate(90deg); 
+    }
+    /* 0.95秒（73%）の激突時に不透明度50%（opacity: 0.5）・90度回転のまま出現 */
+    73% { 
+        opacity: 0.08; 
+        transform: scale(1.9) rotate(90deg); 
+        filter: sepia(1) hue-rotate(10deg); 
+    }
+    90%, 100% { 
+        opacity: 0; 
+        transform: scale(2.0) translate(-20px, -10px) rotate(90deg); 
+        filter: blur(8px); 
+    }
+}
+
+/* 💥 激突時の特大爆発エフェクト */
+#eff-scr.wing-tornado-bg::after {
+    content: "💥";
+    position: absolute;
+    bottom: 8%;
+    left: 8%;
+    font-size: 120px;
+    z-index: 10050;
+    pointer-events: none;
+    opacity: 0;
+    animation: tornadoBlastImpact 1.3s ease-out forwards;
+}
+
+@keyframes tornadoBlastImpact {
+    0%, 70% { opacity: 0; transform: scale(0.2); }
+    /* 0.95秒（73%）の激突の瞬間にドカンと100pxで膨張 */
+    73% { opacity: 1; transform: scale(1.3); filter: drop-shadow(0 0 20px #f97316); }
+    90%, 100% { opacity: 0; transform: scale(1.8); filter: blur(10px); }
+}
+/* --------------------------------------------------------------------------
+   5. 🪨 ストーンゴーレム：ストーンタックル
+   -------------------------------------------------------------------------- */
+/* 💥 激突の瞬間に炸裂する極大衝撃波 */
+#eff-scr.stone-tackle-impact { animation: stoneTackleFlash 0.8s ease-out forwards; }
+@keyframes stoneTackleFlash {
+    0%, 35% { background-color: rgba(0,0,0,0); box-shadow: 0 0 0 0 transparent; }
+    /* 敵が突進して激突した瞬間（40%）に世界が真っ白に大フラッシュ！ */
+    40% { background-color: rgba(255, 255, 255, 0.95); box-shadow: 0 0 150px 100px #fff; }
+    55% { background-color: rgba(100, 116, 139, 0.6); }
+    100% { background-color: rgba(0,0,0,0); box-shadow: 0 0 0 0 transparent; }
+}
+/* 🪨 画面をハチャメチャにシェイクさせるボード連動 */
+.stone-tackle-impact ~ #sq-board,
+.stone-tackle-impact + #sq-board,
+#sq-board.stone-heavy-shake {
+    animation: stoneHeavyShakeAnim 0.8s ease-in-out forwards;
+}
+@keyframes stoneHeavyShakeAnim {
+    0%, 35% { transform: translate(0, 0); }
+    40% { transform: translate(-15px, -15px) rotate(-2deg); }
+    45% { transform: translate(15px, 15px) rotate(2deg); }
+    50% { transform: translate(-12px, 10px) rotate(-1deg); }
+    55% { transform: translate(10px, -12px) rotate(1deg); }
+    60% { transform: translate(-8px, -5px); }
+    75% { transform: translate(4px, 4px); }
+    100% { transform: translate(0, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   5. 🪨 ネクロブック
+   -------------------------------------------------------------------------- */
+/* 📖 1. 栞の男のベース配置設定（主人公に重ねる） */
+#eff-scr.bookatk::before {
+    content: "";
+    position: absolute;
+    
+    /* 👤 主人公の真上に重ねる配置 */
+    /* 画面のちょうど真ん中に画像の中央が来るように設定します */
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%); /* 自身のサイズ分戻して完全にセンター合わせ */
+    
+    /* 🖼️ 画像のサイズ設定（主人公を覆い隠すくらいのサイズに調整） */
+    width: 100px;  /* 栞の男の横幅 */
+    height: 150px; /* 栞の男の縦幅 */
+    
+    /* 画像の読み込み */
+    background: url("https://github.com/shadow-monk/spiral-tower2/blob/main/assets/enemies/others/monster_blackman_01.png?raw=true") no-repeat center / contain;
+    
+    /* 👤 【新規追加】画像自体の輪郭に濃い黒い影（シャドウボックス効果）を付与 */
+    filter: drop-shadow(0 0 15px rgba(207, 188, 188, 0.9));
+
+    /* 前面に出すためのレイヤー設定 */
+    z-index: 10005;
+    pointer-events: none;
+    opacity: 0; /* 最初は透明 */
+    
+    /* 🎬 演出アニメーションをセット（指定通り3秒間） */
+    animation: summonBlackmanSimple 9.0s ease-in-out forwards;
+}
+/* 🎬 2. 栞の男の出現アニメーション（3秒キープ版） */
+@keyframes summonBlackmanSimple {    0% {        opacity: 1;    }
+    10% {        opacity: 1;    }
+    90% {        opacity: 1;    }
+    100% {        opacity: 1;    }
+}
+
+/* スローイング攻撃 */
+/* 投石（JSから送られてきたアイコンをそのまま大迫力で投げる箱） */
+#eff-scr.throwing::before { 
+    /* 💡 JSから届いた絵文字を表示する（届かない場合の保険として "🪨" を仕込む） */
+    content: var(--bullet-icon, "🪨"); 
+    font-size: var(--bullet-size, 60px);
+    position: absolute;     top: 50%;     left: 75%;     z-index: 9999;     opacity: 0;
+     pointer-events: none;
+    transform-origin: center center;
+    animation: toss 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;}
+@keyframes toss {    0% {         left: 75%;         top: 45%;        transform: scale(0.3) rotate(0deg);         filter: blur(0px);
+        opacity: 0;     }
+    15% {         opacity: 1;     }
+    50% {        top: 20%;         transform: scale(1.0) rotate(180deg);        filter: blur(0px);    }
+       70% {         left: 14%;         top: 48%;        transform: scale(0.8) rotate(360deg);         opacity: 1;        filter: blur(0px);    }
+    100% {         left: 10%;         top: 50%;        transform: scale(1.0) rotate(420deg);         opacity: 0; 
+        filter: blur(20px); /* 飛び散って溶けるブラー */    }}
+
+#eff-scr.throwing {    animation: acidMeltBackground 0.9s ease-out forwards;}
+
+
+
+
+/* ⚡スラッシュ　剣などの斬撃 */
+#eff-scr.slash::before {    content: "";
+    position: absolute;
+        /* 📐 画面の「縦のド真ん中（50%）」に線の基準点を合わせる */
+    top: 20%;
+    /* 📐 画面の中央付近をカバーする幅と高さ */
+    left: -40%;    width: 120%;    height: 10px; /* 斬撃の太さ */
+        background: linear-gradient(90deg, transparent, #aa376d 50%, transparent);
+    box-shadow: 0 0 30px #9b0d70, 0 0 10px #bddb14;
+    
+    /* 📐 画面の中心軸（真ん中）を起点にする */
+    transform-origin: center center;    transform: rotate(80deg);
+    
+    opacity: 0;    pointer-events: none;
+    z-index: 59;
+    
+    /* 🎬 他の古い台本と被らない、この線専用の新しいアニメーションを指定 */
+    animation: instantSharpSlashLine 0.2s ease-out forwards;
+}
+
+/* 🎬 完全にその場で固定し、スライドを「0」にする専用のキーフレーム */
+@keyframes instantSharpSlashLine {    0% {         transform: rotate(80deg); 
+        opacity: 0;     }
+    10% {         transform: rotate(80deg);         opacity: 1; /* その場でパッと発光 */
+    }
+    85% {         transform: rotate(80deg);         opacity: 1; /* その場でガチッとキープ */
+    }
+    100% {         transform: rotate(80deg);         opacity: 0; /* その場でスッと消滅 */
+    }
+}
+/* ⚡打撃　HIT */
+#eff-scr.strike::after {
+     content: "💥" ; 
+    font-size: 80px;
+    text-align: center;
+    line-height: 250px;
+    
+    position: absolute; 
+    bottom: 5%; 
+    left: 5%; 
+    width: 140px; 
+    height: 250px; 
+    
+    z-index: 10006; 
+    pointer-events: none; 
+    opacity: 0;
+    
+    animation: simpleHit 0.5s ease-out forwards;
+}
+
+@keyframes simpleHit {
+    0% { opacity: 0; transform: scale(0.5); }
+    15% { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+
+/* ⚡連続打撃　連続攻撃 */
+/* 💥 敵の攻撃が主人公に命中したときの打撃（3連撃コンボ） */
+#eff-scr.strike4::after {
+    content: "💥";     font-size: 90px;    text-align: center;    line-height: 250px;
+    
+    /* 📐 ベースの配置枠（ここを起点に周囲に散らします） */
+    position: absolute;     bottom: 5%;     left: 5%;     width: 140px;     height: 250px; 
+        z-index: 10006;     pointer-events: none;     opacity: 0;
+    
+    /* ⏱️ 演出時間（0.6秒） */
+    animation: tripleScatterHit 0.6s linear forwards;}
+
+/* 🎬 1撃ごとに表示位置（translate）を上下左右にガクガクとズラす台本 */
+@keyframes tripleScatterHit {    /* ── 💥 1撃目：牙 */
+    0% { opacity: 0; transform: translate(-25px, -30px) scale(0.4) rotate(-15deg); }
+    4% { opacity: 1; transform: translate(-25px, -30px) scale(1.1) rotate(5deg); }
+    24% { opacity: 0; transform: translate(-25px, -30px) scale(1.3) rotate(0deg); }
+    /* ── 💥 2撃目：爪 */
+    25% { opacity: 0; transform: translate(30px, 40px) scale(0.4) rotate(20deg); }
+    29% { opacity: 1; transform: translate(30px, 40px) scale(1.2) rotate(-10deg); }
+    59% { opacity: 0; transform: translate(30px, 40px) scale(1.4) rotate(0deg); }
+    /* ── 💥 3撃目：回し蹴り */
+    60% { opacity: 0; transform: translate(0px, 0px) scale(0.5) rotate(-25deg); }
+    64% { opacity: 1; transform: translate(0px, 0px) scale(1.6) rotate(25deg); } 
+    100% { opacity: 0; transform: translate(0px, 0px) scale(1.9) rotate(0deg); }}
+
+
+
+/* ==========================================================================
+   🧙‍♂️ 2. 主人公（ウィザード）選定魔法・超絶CSS演出大要塞（全23呪文大増築）
+   ========================================================================== */
+
+/* 🔥 ファイア：放物線火炎弾バースト */
+#eff-scr.anim-player-fire::after,
+.anim-player-fire::after {
+    content: ""; position: absolute; width: 35px; height: 35px;
+    background: radial-gradient(circle, #f97316 20%, #ef4444 60%, transparent 80%);
+    border-radius: 50%; filter: drop-shadow(0 0 15px #f97316); z-index: 60; pointer-events: none;
+    animation: launchFireBall 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes launchFireBall {
+    0% { top: 50%; left: 20%; transform: scale(0.4); opacity: 1; }
+    40% { top: 15%; left: 45%; transform: scale(1.3); }
+    75% { top: 45%; left: 75%; transform: scale(1); opacity: 1; filter: blur(0); }
+    100% { top: 48%; left: 80%; transform: scale(3.5); opacity: 0; filter: blur(12px); background: radial-gradient(circle, #facc15 10%, transparent 60%); }
+}
+#eff-scr.anim-player-fire #e-sprite-container { animation: enemyBurnFlash 0.6s ease-in-out; }
+@keyframes enemyBurnFlash {
+    0%, 60% { filter: brightness(1) sepia(0); }
+    75% { filter: brightness(2) sepia(1) saturate(5) hue-rotate(-50deg); transform: scale(1.1); }
+    100% { filter: brightness(1) sepia(0); }
+}
+
+/* ❄️ 【ディレクター神監修】アイス：周囲4重の氷結晶湧き上がり・内包圧縮大爆発（古い落下を完全破壊！） */
+#eff-scr.anim-player-ice::after {
+    content: "❄️   ❄️\A ❄️   ❄️"; white-space: pre; line-height: 1.2; font-size: 42px; color: #38bdf8 !important;
+    text-align: center; position: absolute; top: 35%; left: 66%; width: 140px; height: 140px;
+    z-index: 61; pointer-events: none; opacity: 0; filter: drop-shadow(0 0 15px #0ea5e9);
+    animation: iceCrystalEncircleCompress 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes iceCrystalEncircleCompress {
+    0% { transform: scale(2.8) rotate(0deg); opacity: 0; }
+    40% { transform: scale(1.3) rotate(90deg); opacity: 1; }
+    70% { transform: scale(0.4) rotate(180deg); opacity: 1; filter: brightness(2.5); }
+    100% { transform: scale(0); opacity: 0; filter: blur(8px); }
+}
+
+/* ✨ ホーリー：多重聖結晶ビット */
+#eff-scr.anim-player-holy::after {
+    content: "❖ \A ❖       ❖ \A ❖"; white-space: pre; line-height: 1.1; font-size: 32px; color: #facc15 !important;
+    text-align: center; position: absolute; top: 33%; left: 66%; width: 130px; height: 130px; z-index: 60; pointer-events: none; opacity: 0;
+    text-shadow: 0 0 15px #eab308, 0 0 30px #ffffff; animation: holyBitsCompress 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+@keyframes holyBitsCompress {
+    0% { transform: scale(2.2) rotate(0deg); opacity: 0; }
+    30% { transform: scale(1.3) rotate(180deg); opacity: 1; }
+    65% { transform: scale(0.2) rotate(720deg); opacity: 1; filter: brightness(3); }
+    100% { transform: scale(4); opacity: 0; filter: blur(15px); background: #ffffff; }
+}
+
+
+/* ⚡ チャージ：足元からのオーラ湧き上がり */
+#eff-scr.anim-player-chg::after {
+    content: ""; position: absolute; bottom: 5%; left: 5%; width: 140px; height: 250px;
+    background: linear-gradient(0deg, rgba(168,85,247,0.4) 0%, rgba(59,130,246,0.2) 70%, transparent 100%);
+    border-left: 2px dashed rgba(168,85,247,0.5); border-right: 2px dashed rgba(59,130,246,0.5); z-index: 58; pointer-events: none;
+    animation: auraEruption 1.1s ease-out forwards;
+}
+@keyframes auraEruption {
+    0% { transform: scaleX(0.2) translateY(50px); opacity: 0; }
+    20%, 80% { transform: scaleX(1.2) translateY(0); opacity: 1; filter: contrast(1.5); }
+    50% { transform: scaleX(0.9) skewX(5deg); }
+    100% { transform: scaleX(1.8) translateY(-30px); opacity: 0; filter: blur(10px); }
+}
+
+/* 🐝 追加：ワスプ（蜂の大群・黄色ネオン粒子螺旋） */
+#eff-scr.anim-player-wasp::after {
+    content: "•• ••\A •• ••"; white-space: pre; font-size: 28px; color: #fbbf24 !important; text-shadow: 15px 15px 0 #1e293b, -15px -15px 0 #fbbf24;
+    position: absolute; top: 40%; left: 70%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: waspSwarm 0.6s ease-out forwards;
+}
+@keyframes waspSwarm {
+    0% { transform: scale(0.1) rotate(0deg); opacity: 0; left: 20%; }
+    50% { opacity: 1; transform: scale(1.5) rotate(360deg); left: 50%; }
+    100% { transform: scale(2.5) rotate(720deg); opacity: 0; left: 75%; filter: blur(4px); }
+}
+
+/* 📢 追加：スクリーム（高速3重ソニックウェーブ） */
+#eff-scr.anim-player-scre::after {
+    content: "(( ))"; font-size: 60px; color: rgba(167,139,250,0.7); font-weight: bold;
+    position: absolute; top: 38%; left: 20%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: sonicScream 0.5s ease-in forwards;
+}
+@keyframes sonicScream {
+    0% { transform: scaleX(0.2); opacity: 0; left: 20%; }
+    50% { opacity: 1; transform: scaleX(1.5) scaleY(1.2); }
+    100% { transform: scaleX(3.5); opacity: 0; left: 75%; filter: blur(8px); }
+}
+
+/* 🪞 追加：リフレク（目の前の矩形シアンブルー魔導鏡結界） */
+#eff-scr.anim-player-refl::after {
+    content: ""; position: absolute; top: 25%; left: 30%; width: 24px; height: 140px;
+    background: rgba(56,189,248,0.3); border: 3px solid #38bdf8; box-shadow: 0 0 15px #38bdf8;
+    z-index: 60; pointer-events: none; opacity: 0; animation: mirrorReflect 1.1s ease-in-out forwards;
+}
+@keyframes mirrorReflect {
+    0% { transform: scaleY(0); opacity: 0; }
+    15%, 85% { transform: scaleY(1); opacity: 0.9; }
+    100% { transform: scaleY(0); opacity: 0; }
+}
+
+/* 🧚 追加：ウィスプ（緑・黃・白の3連光粒子上昇） */
+#eff-scr.anim-player-wisp::after {
+    content: "✨ ✨\A ✨"; white-space: pre; font-size: 26px; color: #5eead4 !important; text-shadow: 30px -20px 0 #facc15, -20px -30px 0 #ffffff;
+    position: absolute; top: 45%; left: 45%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: wispRise 0.6s ease-out forwards;
+}
+@keyframes wispRise {
+    0% { transform: translateY(60px) scale(0.5); opacity: 0; }
+    50% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+    100% { transform: translateY(-70px) scale(1.5); opacity: 0; filter: blur(5px); }
+}
+
+
+
+/* ==========================================
+   🚀 マジックミサイル：完全復活・白煙決定版
+   ========================================== */
+
+/* 🌟 出現予定地に灯るチャージ光 */
+#eff-scr.anim-player-mmis .mmis-charge {
+    position: absolute;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 10px #fff, 0 0 20px #38bdf8, 0 0 40px #0ea5e9;
+    z-index: 9999;
+    transform: translateY(-50%) scale(1.5);
+    animation: mmisFlash 0.3s ease-out forwards;
+}
+#eff-scr.anim-player-mmis .mmis-charge.pos-top    { top: 20%; }
+#eff-scr.anim-player-mmis .mmis-charge.pos-mid    { top: 45%; }
+#eff-scr.anim-player-mmis .mmis-charge.pos-bottom { top: 70%; }
+
+@keyframes mmisFlash {
+    0% { transform: translateY(-50%) scale(1.5); opacity: 1; }
+    50% { transform: translateY(-50%) scale(2.5); opacity: 1; filter: blur(1px); }
+    100% { transform: translateY(-50%) scale(0); opacity: 0; }
+}
+
+/* 🚀 光の魔弾ベース */
+#eff-scr.anim-player-mmis .mmis-bolt {
+    position: absolute;
+    left: 0;
+    width: 90px;
+    height: 5px;
+    border-radius: 3px;
+    opacity: 0;
+    z-index: 9999;
+    background: linear-gradient(to right, transparent, #38bdf8, #fff);
+    box-shadow: 0 0 12px #38bdf8, 0 0 25px #0ea5e9;
+    animation-duration: 0.4s;
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+    animation-fill-mode: forwards;
+}
+
+/* 発射ディレイ設定 */
+#eff-scr.anim-player-mmis .mmis-bolt.pos-top    { top: 20%; animation-name: mmisTop; animation-delay: 0s; }
+#eff-scr.anim-player-mmis .mmis-bolt.pos-mid    { top: 45%; animation-name: mmisMid; animation-delay: 0.04s; }
+#eff-scr.anim-player-mmis .mmis-bolt.pos-bottom { top: 70%; animation-name: mmisBot; animation-delay: 0.08s; }
+
+/* 📐 軌道アニメーション */
+@keyframes mmisTop {
+    0% { transform: scale(0.5) rotate(10deg); opacity: 1; left: 0%; }
+    100% { transform: translate(65vw, 15vh) scaleX(2.5) rotate(25deg); opacity: 0; left: 10%; }
+}
+@keyframes mmisMid {
+    0% { transform: scale(0.5) rotate(0deg); opacity: 1; left: 0%; }
+    100% { transform: translate(65vw, 0vh) scaleX(2.5) rotate(0deg); opacity: 0; left: 10%; }
+}
+@keyframes mmisBot {
+    0% { transform: scale(0.5) rotate(-10deg); opacity: 1; left: 0%; }
+    100% { transform: translate(65vw, -15vh) scaleX(2.5) rotate(-25deg); opacity: 0; left: 10%; }
+}
+
+/* 🟢 【修正】最優先で適用されるよう、システムクラス（#eff-scr.anim-player-mmis）を頭に結合 */
+#eff-scr.anim-player-mmis #mmis-swarm-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+/* 🟢 【完全新規】白煙だけを確実に発生させるための独立パーツをCSS側で用意 */
+#eff-scr.anim-player-mmis #mmis-swarm-container::after {
+    content: "" !important;
+    position: absolute;
+    z-index: 10000;
+    /* ⚡ 3発目が届くベストタイミング（0.4秒後）でモクモクと湧き出る設定 */
+    animation: missileDash 0.8s linear forwards; 
+}
+
+/* 🌫️ 決定版：命中時の「もくもく豊かな白煙」演出（フラッシュ完全排除） */
+@keyframes missileDash {
+    /* 0%〜45%：ミサイルが飛んでいる間は透明に隠す */
+    0%, 45% { 
+        background: radial-gradient(circle, rgba(230,230,230,0.7) 0%, rgba(180,180,180,0.3) 50%, transparent 70%);
+        filter: blur(5px);
+        left: 80%; top: 45%; width: 150px; height: 150px; transform: translate(-50%, -50%) scale(0.1); opacity: 0;
+    }
+    /* ⚡ 50%：3発目が突き刺さった瞬間に白煙がジャストで出現！ */
+    50% { 
+        opacity: 0.85; 
+        transform: translate(-50%, -50%) scale(1.1); 
+        filter: blur(6px);
+    }
+    /* 💨 75%：もくもくと横へ柔らかく広がる */
+    75% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1.8); 
+        filter: blur(12px);
+    }
+    /* 🌫️ 100%：静かに消滅 */
+    100% { 
+        left: 80%; top: 45%;
+        transform: translate(-50%, -50%) scale(2.4); 
+        filter: blur(20px); 
+        opacity: 0; 
+    }
+}
+
+/* ✂️ 追加：シザース（ド真ん中巨大ハサミ交差） */
+#eff-scr.anim-player-scis::after {
+    content: "✂️"; font-size: 100px; color: #94a3b8 !important;
+    position: absolute; top: 25%; left: 62%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: scissorCut 3.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+@keyframes scissorCut {
+    0% { transform: scale(0) rotate(10deg); opacity: 0; }
+    50% { transform: scale(0.4) rotate(10deg); opacity: 1; }
+    100% { transform: scale(1) rotate(20deg); opacity: 0; filter: blur(5px); }
+}
+/* 🎯 斬撃の線を【画面のド真ん中】へ配置修正！ */
+#eff-scr.anim-player-scis::before {
+    content: "";
+    position: absolute;
+    
+    /* 📐 画面の「縦のド真ん中（50%）」に線の基準点を合わせる */
+    top: 50%;
+    /* 📐 画面の「左外側」から「右外側」までを完全にカバーする幅と高さ */
+    left: -10%;
+    width: 200%;
+    height: 6px; /* 斬撃の太さ（気持ち少しだけ太くしてクッキリさせました！） */
+    
+    background: linear-gradient(90deg, transparent, #ffffff 50%, transparent);
+    box-shadow: 0 0 30px #05d9e8, 0 0 10px #05d9e8;
+    
+    /* 📐 【ここが超重要！】
+       画面の中心軸（真ん中）を起点にして斜め45度に傾けることで、
+       右上すぎた線を「画面の完全な中心（センター）」へ引き戻します */
+    transform-origin: center center;
+    transform: translateY(-10%) rotate(45deg);
+    
+    opacity: 0;
+    pointer-events: none;
+    z-index: 59;
+    
+    /* 🎬 3.9秒の演出の中で、一瞬でシャッ！！！と一閃させる */
+    animation: energySlashLine 3.9s ease-out forwards;
+}
+
+/* 🎬 斬撃の線が光速で走って消えるタイムライン（君の元のタイミング・動きを完全保護！） */
+@keyframes energySlashLine {
+    0% {
+        /* 最初は画面外（左上）に引っ込めておく */
+        transform: translateY(-50%) translate(-30%, -30%) rotate(45deg) scaleX(0);
+        opacity: 0;
+    }
+    10%, 15% {
+        /* 開始直後に一瞬で右下までズバシャァァッ！！！と光速で線を伸ばす！ */
+        transform: translateY(-50%) translate(0%, 0%) rotate(45deg) scaleX(1);
+        opacity: 1;
+        filter: brightness(2);
+    }
+    30% {
+        /* 斬り裂いた空間の光が、パッと裂けて消えていく余韻 */
+        transform: translateY(-50%) translate(0%, 0%) rotate(45deg) scaleY(3);
+        opacity: 0.5;
+        filter: blur(2px);
+    }
+    40%, 100% {
+        transform: translateY(-50%) translate(0%, 0%) rotate(45deg);
+        opacity: 0;
+        filter: blur(10px);
+    }
+}
+
+
+/* ☀️ 追加：フラッシュ */
+#eff-scr.anim-player-flas,
+.anim-player-flas {
+    animation: fullScreenFlash 0.5s ease-out forwards;
+}
+@keyframes fullScreenFlash {
+    0%, 20% { background-color: #ffffff !important; }
+    100% { background-color: #0f172a !important; }
+}
+
+/* 🩸 追加：ドレイン */
+#eff-scr.anim-player-drai::after,
+.anim-player-drai::after {
+    content: "🔴"; font-size: 30px; position: absolute; top: 50%; left: 70%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: bloodDrain 0.6s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards;
+}
+@keyframes bloodDrain {
+    0% { left: 70%; transform: scale(1.5); opacity: 1; filter: blur(0); }
+    50% { left: 45%; transform: scale(1); }
+    100% { left: 20%; transform: scale(0.5); opacity: 0; filter: blur(6px); }
+}
+
+/* ⏳ 追加：スロウ */
+#eff-scr.anim-player-slow::after {
+    content: "⏳"; font-size: 50px; position: absolute; top: 40%; left: 68%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: timeSlow 0.6s ease-in-out forwards;
+}
+@keyframes timeSlow {
+    0% { transform: scale(0) rotate(0deg); opacity: 0; }
+    50% { transform: scale(1.5) rotate(180deg); opacity: 1; }
+    100% { transform: scale(1) rotate(360deg); opacity: 0; filter: blur(8px); }
+}
+
+/* 🌊 フラッド：3連波アイコン隙間ゼロ・横200%引き伸ばし流動版 */
+#eff-scr.anim-player-flod::after,
+.anim-player-flod::after {
+    content: "🌊🌊🌊🌊🌊🌊";    /* 👈 アイコン3個を隙間なく並べる */
+    position: absolute; 
+    top: 45%; 
+    left: 0; 
+    width: 100%;          /* 戦闘枠の横幅に固定 */
+    height: 70%;
+    z-index: 60; 
+    pointer-events: none; 
+    
+    /* 🎨 3個の波をピタッと繋ぐサイズ調整 */
+    font-size: 145px; 
+    line-height: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    letter-spacing: -40px; 
+    overflow: hidden;
+    
+    /* ⚡ 水色ネオンの強い光芒 */
+    filter: drop-shadow(0 -15px 20px #38bdf8) brightness(1.2);
+    
+    /* 🎬 0.6秒かけて左から右へ流れるアニメーション */
+    animation: floodWaveStreaming200 0.6s ease-in-out forwards;
+}
+
+/* 🔄 【新設計】横幅を200%（2倍）に変形させながら、左から右へ流す台本 */
+@keyframes floodWaveStreaming200 {
+    /* 0%：画面の左の外側（-150%の位置）からスタート */
+    0%   { 
+        transform: translateX(-200%) scaleX(9.0); /* 👈 横に200%（2倍）引き伸ばし！ */
+        opacity: 0; 
+    }
+    
+    /* 45%〜55%：200%の超ワイドな大津波が画面いっぱいに広がりながら激しく通過！ */
+    45%  { 
+        transform: translateX(0%) scaleX(9.0);    /* 👈 2倍をキープして画面を埋める */
+        opacity: 0.95; 
+    }   
+    55%  { 
+        transform: translateX(-20%) scaleX(7.0); 
+        opacity: 0.95; 
+    } 
+    
+    /* 100%：そのまま勢いよく画面の右の外側（150%の位置）へ流れ去る */
+    100% { 
+        transform: translateX(1500%) scaleX(6.0); 
+        opacity: 0; 
+    }
+}
+
+/* 🧪 追加：バイオ */
+#eff-scr.anim-player-bio::after,
+.anim-player-bio::after {
+    content: "🫧 🫧\A 🫧"; white-space: pre; font-size: 35px; color: #22c55e !important; text-shadow: 20px 20px 0 #16a34a;
+    position: absolute; top: 42%; left: 65%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: bioBubbles 0.6s ease-out forwards;
+}
+@keyframes bioBubbles {
+    0% { transform: scale(0.4) translateY(30px); opacity: 0; }
+    50% { opacity: 1; transform: scale(1.2) translateY(-10px); }
+    100% { transform: scale(1.5) translateY(-30px); opacity: 0; filter: blur(6px); }
+}
+
+/* 🪨 クエイク：所定の定位置（下部40%）に直接出現して激震 */
+#eff-scr.anim-player-quak::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 40%;
+    z-index: 60;
+    pointer-events: none;
+
+    /* 🧱 岩石ブロック ＋ 🔥 マグマグラデーション（定位置に描画） */
+    background: 
+        linear-gradient(115deg, transparent 60%, #451a03 60% 75%, transparent 75%),
+        linear-gradient(245deg, transparent 65%, #351403 65% 80%, transparent 80%),
+        linear-gradient(135deg, transparent 70%, #270e02 70% 90%, transparent 90%),
+        linear-gradient(225deg, transparent 55%, #451a03 55% 70%, transparent 70%),
+        linear-gradient(to bottom, #451a03 0%, #ff1100 30%, #ffea00 50%, #ff1100 70%, #b91c1c 100%);
+
+    box-shadow: 0 -10px 25px rgba(255, 68, 0, 0.6);
+    animation: quakeStaticShake 0.6s ease-in-out forwards;
+}
+
+/* 🔄 せり上がり（translateY）を完全撤廃：その場で揺れて消える */
+@keyframes quakeStaticShake {
+    0%   { opacity: 0; transform: translate(0, 0); }
+    10%  { opacity: 1; transform: translate(-8px, 4px); }
+    30%  { opacity: 1; transform: translate(8px, -4px); }
+    50%  { opacity: 1; transform: translate(-6px, 3px); }
+    70%  { opacity: 0.8; transform: translate(6px, -3px); }
+    90%  { opacity: 0.3; transform: translate(-3px, 1px); }
+    100% { opacity: 0; transform: translate(0, 0); }
+}
+
+/* 💤 追加：スリープ */
+#eff-scr.anim-player-slee::after,
+.anim-player-slee::after {
+    content: "💤\A   💤"; white-space: pre; font-size: 40px; color: #38bdf8 !important;
+    position: absolute; top: 35%; left: 70%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: sleepZ 0.7s ease-out forwards;
+}
+@keyframes sleepZ {
+    0% { transform: scale(0.5) translateY(20px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1.3) translateY(-40px); opacity: 0; }
+}
+
+/* 💀 追加：デス */
+#eff-scr.anim-player-dead::after,
+.anim-player-dead::after {
+    content: "☠"; font-size: 90px; color: #111827 !important; text-shadow: 0 0 20px #ef4444;
+    position: absolute; top: 30%; left: 65%; z-index: 60; pointer-events: none; opacity: 0;
+    animation: deathscythe 0.6s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+@keyframes deathscythe {
+    0% { transform: scale(0) rotate(-90deg); opacity: 0; }
+    50% { transform: scale(1.4) rotate(0deg); opacity: 1; }
+    100% { transform: scale(2) rotate(45deg); opacity: 0; filter: blur(10px); }
+}
+
+/* 🌋 追加：メテオ */
+#eff-scr.anim-player-mete::after,
+.anim-player-mete::after {
+    content: ""; position: absolute; width: 80px; height: 80px;
+    background: radial-gradient(circle, #f97316 30%, #7f1d1d 80%, transparent);
+    border-radius: 50%; box-shadow: 0 0 40px #ef4444; z-index: 60; pointer-events: none;
+    animation: meteorCrash 0.6s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+}
+@keyframes meteorCrash {
+    0% { top: -80px; left: 90%; transform: scale(0.2); opacity: 0; }
+    60% { top: 40%; left: 68%; transform: scale(1.5); opacity: 1; }
+    100% { top: 45%; left: 65%; transform: scale(4); opacity: 0; filter: blur(15px); }
+}
+
+/* 🌪️ 追加：エアロ（遠近パース付き・斜め旋回気流 3D風の筋・派手＆音同期版） */
+#eff-scr.anim-player-aero {
+    perspective: 380px;
+    animation: aero3dBgTint 0.9s ease-out forwards;
+}
+
+/* 1層目（::before）：手前から奥へ斜めに回り込む多層エメラルド気流＋風粒 */
+#eff-scr.anim-player-aero::before {
+    content: "";
+    position: absolute;
+    top: 12%;
+    left: 49%;
+    width: 265px;
+    height: 265px;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'><defs><linearGradient id='streakG1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0'/><stop offset='40%25' stop-color='%2334d399' stop-opacity='0.95'/><stop offset='82%25' stop-color='%23ffffff' stop-opacity='1'/><stop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/></linearGradient><linearGradient id='streakG2' x1='100%25' y1='0%25' x2='0%25' y2='100%25'><stop offset='0%25' stop-color='%236ee7b7' stop-opacity='0'/><stop offset='45%25' stop-color='%23059669' stop-opacity='0.85'/><stop offset='88%25' stop-color='%23a7f3d0' stop-opacity='1'/><stop offset='100%25' stop-color='%23ecfdf5' stop-opacity='0'/></linearGradient></defs><g fill='none' stroke-linecap='round'><path d='M 18,120 A 102,102 0 0,1 196,54' stroke='url(%23streakG1)' stroke-width='5.5'/><path d='M 222,130 A 100,100 0 0,1 58,204' stroke='url(%23streakG2)' stroke-width='5'/><path d='M 36,68 A 86,86 0 0,1 190,88' stroke='url(%23streakG1)' stroke-width='3.5'/><path d='M 200,164 A 84,84 0 0,1 46,166' stroke='url(%23streakG2)' stroke-width='3.5'/><path d='M 58,172 A 68,68 0 0,1 74,64' stroke='url(%23streakG1)' stroke-width='3'/><path d='M 178,72 A 66,66 0 0,1 158,176' stroke='url(%23streakG2)' stroke-width='3'/><path d='M 82,46 A 76,76 0 0,1 206,126' stroke='url(%23streakG1)' stroke-width='2'/></g><g fill='%23ffffff'><circle cx='198' cy='58' r='3' opacity='0.95'/><circle cx='54' cy='200' r='2.8' opacity='0.9'/><circle cx='188' cy='90' r='2.5' fill='%236ee7b7'/><circle cx='44' cy='162' r='2.5' fill='%23a7f3d0'/><circle cx='124' cy='22' r='2.2' opacity='0.85'/><circle cx='116' cy='218' r='2.2' opacity='0.85'/></g></svg>");
+    filter: drop-shadow(0 0 18px #10b981) drop-shadow(0 0 32px rgba(52, 211, 153, 0.75));
+    animation: aero3dStreakMain 0.9s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+}
+
+/* 2層目（::after）：逆斜めに交差しながら超高速回転する高輝度・真空細刃 */
+#eff-scr.anim-player-aero::after {
+    content: "";
+    position: absolute;
+    top: 14%;
+    left: 51%;
+    width: 245px;
+    height: 245px;
+    pointer-events: none;
+    z-index: 61;
+    opacity: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 220 220'><defs><linearGradient id='razorW' x1='0%25' y1='0%25' x2='100%25' y2='0%25'><stop offset='0%25' stop-color='%2367e8f9' stop-opacity='0'/><stop offset='50%25' stop-color='%236ee7b7' stop-opacity='0.9'/><stop offset='90%25' stop-color='%23ffffff' stop-opacity='1'/><stop offset='100%25' stop-color='%23ffffff' stop-opacity='0'/></linearGradient></defs><g fill='url(%23razorW)'><path d='M 24,104 A 84,84 0 0,1 162,42 A 89,89 0 0,0 28,107 Z'/><path d='M 196,116 A 84,84 0 0,1 58,178 A 89,89 0 0,0 192,113 Z'/><path d='M 56,44 A 72,72 0 0,1 174,128 A 76,76 0 0,0 58,47 Z'/><path d='M 164,176 A 72,72 0 0,1 46,92 A 76,76 0 0,0 162,173 Z'/></g></svg>");
+    filter: drop-shadow(0 0 14px #ffffff) drop-shadow(0 0 26px #34d399);
+    animation: aero3dStreakCross 0.9s cubic-bezier(0.22, 0.85, 0.35, 1) forwards;
+}
+
+/* 敵詠唱時の左右反転（.reverse-fx）対応 */
+#eff-scr.anim-player-aero.reverse-fx::before {
+    left: 2%;
+}
+#eff-scr.anim-player-aero.reverse-fx::after {
+    left: 4%;
+}
+
+@keyframes aero3dBgTint {
+    0% { background-color: #0f172a; }
+    52% { background-color: #063732; box-shadow: inset 0 0 70px rgba(16, 185, 129, 0.35); }
+    66% { background-color: #0d4a42; box-shadow: inset 0 0 110px rgba(167, 243, 208, 0.5); }
+    100% { background-color: #0f172a; box-shadow: none; }
+}
+
+@keyframes aero3dStreakMain {
+    0% {
+        transform: rotateX(64deg) rotateY(-28deg) rotateZ(0deg) scale(0.22);
+        opacity: 0;
+    }
+    25% {
+        transform: rotateX(60deg) rotateY(-24deg) rotateZ(360deg) scale(0.68);
+        opacity: 0.78;
+    }
+    55% {
+        /* ちょうどSE（0.6秒）が鳴る瞬間に最大膨張＆最高輝度で炸裂！ */
+        transform: rotateX(52deg) rotateY(-18deg) rotateZ(960deg) scale(1.28);
+        opacity: 1;
+        filter: brightness(1.6) drop-shadow(0 0 24px #ffffff) drop-shadow(0 0 38px #10b981);
+    }
+    80% {
+        transform: rotateX(48deg) rotateY(-14deg) rotateZ(1320deg) scale(1.42);
+        opacity: 0.9;
+    }
+    100% {
+        transform: rotateX(44deg) rotateY(-10deg) rotateZ(1620deg) scale(1.65);
+        opacity: 0;
+        filter: drop-shadow(0 0 20px #34d399) blur(4px);
+    }
+}
+
+@keyframes aero3dStreakCross {
+    0% {
+        transform: rotateX(66deg) rotateY(30deg) rotateZ(45deg) scale(0.18);
+        opacity: 0;
+    }
+    28% {
+        transform: rotateX(62deg) rotateY(26deg) rotateZ(-420deg) scale(0.62);
+        opacity: 0.85;
+    }
+    58% {
+        /* 音と同期して真空の細刃が一閃発光！ */
+        transform: rotateX(54deg) rotateY(20deg) rotateZ(-1080deg) scale(1.22);
+        opacity: 1;
+        filter: brightness(1.8) drop-shadow(0 0 20px #ffffff) drop-shadow(0 0 34px #34d399);
+    }
+    82% {
+        transform: rotateX(50deg) rotateY(16deg) rotateZ(-1440deg) scale(1.36);
+        opacity: 0.88;
+    }
+    100% {
+        transform: rotateX(46deg) rotateY(12deg) rotateZ(-1760deg) scale(1.58);
+        opacity: 0;
+        filter: drop-shadow(0 0 16px #ffffff) blur(3.5px);
+    }
+}
+
+/* ☄️ 追加：コメット */
+#eff-scr.anim-player-come::after,
+.anim-player-come::after {
+    content: "  ・・ ・\A ・・  ・・・\A ・  ・・\A ・  ・\A ・・  ・"; white-space: pre; font-size: 30px; color: #a5b4fc !important; text-shadow: 0 0 30px #6366f1;
+    position: absolute; z-index: 80; pointer-events: none; opacity: 0; animation: cometRain 0.8s ease-in forwards;
+}
+@keyframes cometRain {
+    0% { top: -50px; left: 30%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 50%; left: 50%; opacity: 0; transform: scale(1.0); }
+}
+
+/* 🧬 追加：グラビデ */
+#eff-scr.anim-player-grav::after,
+.anim-player-grav::after {
+    content: ""; position: absolute; top: 35%; left: 65%; width: 100px; height: 100px;
+    border: 4px dashed #6366f1; border-radius: 50%; background: rgba(99,102,241,0.2);
+    z-index: 60; pointer-events: none; opacity: 0; animation: gravitySink 0.6s ease-in-out forwards;
+}
+@keyframes gravitySink {
+    0% { transform: scale(2); opacity: 0; }
+    50% { transform: scale(0.5); opacity: 1; background-color: #312e81; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+/* 🔮 追加：アナライズ（プレイヤー詠唱時：敵をスキャン） */
+#eff-scr.anim-player-anal::after,
+.anim-player-anal::after {
+    content: "🔍 SCANNING...";
+    font-size: 1.1rem;
+    color: #2dd4bf !important;
+    font-weight: bold;
+    position: absolute;
+    top: 45%;
+    left: 64%;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0;
+    animation: analyzeScan 0.6s ease-in-out forwards;
+}
+
+/* 🔄 敵詠唱時（リバース処理：主人公をスキャン） */
+#eff-scr.anim-player-anal.reverse-fx::after,
+.anim-player-anal.reverse-fx::after {
+    left: 20% !important; /* 主人公の頭上に表示 */
+}
+
+@keyframes analyzeScan {
+    0%, 100% { opacity: 0; transform: scaleY(0); }
+    20%, 80% { opacity: 1; transform: scaleY(1); border-top: 2px solid #2dd4bf; border-bottom: 2px solid #2dd4bf; }
+}
+
+/* 👑 追加：アルテマ */
+#eff-scr.anim-player-ulti {
+    animation: ultimaCosmo 0.8s ease-in-out forwards;
+}
+@keyframes ultimaCosmo {
+    0%, 40% { filter: invert(1) brightness(2); }
+    20%, 60% { filter: invert(0) contrast(3); }
+    100% { filter: invert(0) brightness(1); }
+}
+
+/* 🛡️ シールド：ハニカム構造エネルギー壁 */
+#eff-scr.anim-player-def::after {
+    content: ""; position: absolute; top: 25%; left: 24%; width: 60px; height: 150px;
+    background: linear-gradient(45deg, rgba(52,211,153,0.2) 25%, transparent 25%), linear-gradient(-45deg, rgba(52,211,153,0.2) 25%, transparent 25%);
+    background-size: 10px 10px; border: 3px double #10b981; border-radius: 6px; box-shadow: 0 0 20px #34d399, inset 0 0 15px #10b981;
+    z-index: 59; pointer-events: none; 
+    
+    /* 🚨 ココが大本命の直結配線！ */
+    /* アニメ時間を1.1s（1.1秒）にし、最後に「forwards」をハキハキと絶対に記述してください！ */
+    /* これがないと、アニメが終わった瞬間にバリアが「発動前の透明な状態」に強制ワープで戻って消えてしまいます */
+    animation: spawnHoneycomb 1.1s ease-in-out forwards;
+}
+
+/* 🛡️ シールド：時間軸を完璧に整えた設計図 */
+@keyframes spawnHoneycomb {
+    0% { transform: scaleY(0); opacity: 0; }
+    15% { transform: scaleY(1); opacity: 0.85; }
+    
+    /* 💥 50%（中間）を15%と100%の間に正しく挟み込みます */
+    /* 敵の攻撃が激突してバリアが一瞬ピカッと輝き、揺らめく衝撃エフェクト！ */
+    50% { opacity: 0.5; filter: brightness(1.7); transform: scaleY(1) skewX(2deg); }
+    
+    /* 🔒 100%（最後）になっても、縦幅1倍・不透明度0.85のままガチッと固定！ */
+    /* forwardsの効果と合わさることで、JSでお掃除されるまでこの見た目のまま「永久停止」します！ */
+    100% { transform: scaleY(1); opacity: 0.85; }
+}
+
+/* ⚡ チャージ：足元からのオーラ湧き上がり */
+#eff-scr.anim-player-chg::after {
+    content: ""; position: absolute; bottom: 5%; left: 5%; width: 140px; height: 250px;
+    background: linear-gradient(0deg, rgba(168,85,247,0.4) 0%, rgba(59,130,246,0.2) 70%, transparent 100%);
+    border-left: 2px dashed rgba(168,85,247,0.5); border-right: 2px dashed rgba(59,130,246,0.5); z-index: 58; pointer-events: none;
+    animation: auraEruption 1.1s ease-out forwards;
+}
+@keyframes auraEruption {
+    0% { transform: scaleX(0.2) translateY(50px); opacity: 0; }
+    20%, 80% { transform: scaleX(1.2) translateY(0); opacity: 1; filter: contrast(1.5); }
+    50% { transform: scaleX(0.9) skewX(5deg); }
+    100% { transform: scaleX(1.8) translateY(-30px); opacity: 0; filter: blur(10px); }
+}
+
+
+
+/* ==========================================================================
+   📺 3. 【新設】 『【１】効果ラベル』 ウィンドウ最上部セパレート表示大要塞
+   ========================================================================== */
+#status-badge-header {
+    position: absolute;
+    top: 5px;
+    left: 0;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between; /* 自分（左）と敵（右）を完璧にセパレート！ */
+    z-index: 999;
+    pointer-events: none; /* クリック進行の邪魔を絶対にしない完全透過 */
+}
+
+.status-row-p {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-start;
+}
+
+.status-row-e {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+.retro-status-tag {
+    font-size: 0.8rem !important;
+    font-weight: 900 !important;
+    padding: 2px 5px !important;
+    border-radius: 4px;
+    text-shadow: 1px 1px 0 #000;
+    box-shadow: 0 0 8px rgba(0,0,0,0.8);
+    animation: pulse 0.5s infinite alternate ease-in-out;
+}
+
+/* ==========================================================================
+   📺 4. 下部コマンドエリア・スクロールグリッド構造
+   ========================================================================== */
+#cmd-panel {
+    background-color: #020617 !important;
+    opacity: 1 !important;
+    border-top: 4px solid #1e293b !important;
+}
+
+#panel-main-mode, 
+#panel-magic-mode, 
+#item-bag-panel {
+    background-color: #020617 !important;
+    opacity: 1 !important;
+}
+
+/* 🎯【A面メインアクションボタン】パツパツを完全救出する黄金比の上下内包余白設定！ */
+.btn-magic-main,
+.btn-charge-main,
+.btn-item-main {
+    padding: 12px 0 !important; /* 👈 ギューギューだった上下を肉厚に広げ、ドッシリ押しやすく改善！ */
+    opacity: 1 !important;
+    color: #fff !important;
+    height: auto !important; /* 固定高を引き算し、余白優先でふっくら自動整形 */
+}
+
+.btn-magic-main { background: linear-gradient(180deg, #4f46e5, #3730a3) !important; border-color: #818cf8 !important; }
+.btn-charge-main { background: linear-gradient(180deg, #7e22ce, #581c87) !important; border-color: #c084fc !important; }
+.btn-item-main { background: linear-gradient(180deg, #d97706, #92400e) !important; border-color: #fbbf24 !important; }
+
+/* 🔮 カバン（B面・C面）内のスクロールボタン用のスリム設定 */
+#panel-magic-mode button,
+#item-bag-panel button {
+    padding: 8px 2px !important;
+    font-size: 0.9rem !important;
+    height: auto !important;
+    min-height: 38px !important;
+}
+
+/* 色調調整 */
+#panel-magic-mode button[onclick*="fire"] { background: linear-gradient(180deg, #b91c1c, #7f1d1d) !important; border-color: #f87171 !important; }
+#panel-magic-mode button[onclick*="ice"] { background: linear-gradient(180deg, #0369a1, #0c4a6e) !important; border-color: #7dd3fc !important; }
+#panel-magic-mode button[onclick*="holy"] { background: linear-gradient(180deg, #a16207, #713f12) !important; border-color: #fef08a !important; }
+#panel-magic-mode button[onclick*="def"] { background: linear-gradient(180deg, #047857, #064e3b) !important; border-color: #6ee7b7 !important; }
+
+/* 行動選択に戻るボタン */
+#panel-magic-mode button[onclick*="closeMagicBag"],
+#item-bag-panel button[onclick*="closeItemBag"] {
+    width: 100% !important;
+    height: 36px !important;
+    padding: 4px 0 !important;
+    background: #475569 !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+}
+
+/* ⚡ 新・クリティカルヒット！！特攻スライドバー（上部安全配置 top:15px 厳守） */
+#cutin-bar {
+    position: absolute;
+    width: 100%;
+    height: 48px;
+    background: linear-gradient(90deg, transparent, #b45309 15%, #ef4444 50%, #b45309 85%, transparent) !important;
+    top: 15px !important;
+    left: 0;
+    z-index: 999 !important;
+    display: none; 
+    align-items: center;
+    justify-content: center;
+    border-top: 2px solid #ffffff !important;
+    border-bottom: 2px solid #ffffff !important;
+    box-shadow: 0 0 25px #facc15 !important;
+    animation: cutinSlideIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.25) forwards;
+}
+
+@keyframes cutinSlideIn {
+    0% { transform: scaleY(0) skewX(-15deg); opacity: 0; }
+    100% { transform: scaleY(1) skewX(-15deg); opacity: 1; }
+}
+
+.cutin-text {
+    color: #ffffff !important;
+    font-size: 1.3rem !important;
+    font-weight: 900 !important;
+    font-style: italic !important;
+    letter-spacing: 3px !important;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000 !important;
+    animation: cutinPulse 0.15s infinite alternate ease-in-out;
+}
+@keyframes cutinPulse {
+    0% { transform: scale(0.96); filter: brightness(1); }
+    100% { transform: scale(1.04); filter: brightness(1.5) drop-shadow(0 0 8px #facc15); }
+}
+
+/* 💥 特大白コンテナ激震フラッシュ */
+.screen-shake-flash {
+    animation: shakeFlashAnim 0.45s cubic-bezier(.36, .07, .19, .97) both;
+}
+@keyframes shakeFlashAnim {
+    0%, 100% { transform: translate3d(0, 0, 0); background-color: #ffffff; }
+    10%, 90% { transform: translate3d(-6px, -4px, 0); background-color: #fef08a; }
+    20%, 80% { transform: translate3d(8px, 6px, 0); }
+    30%, 50%, 70% { transform: translate3d(-8px, -6px, 0); background-color: #ffffff; }
+    40%, 60% { transform: translate3d(6px, 4px, 0); }
+}
+
+/* ==========================================================================
+   📺 5. スクロールバー・その他基本アニメーション
+   ========================================================================== */
+div::-webkit-scrollbar { width: 8px; }
+div::-webkit-scrollbar-track { background: #0f172a; border-radius: 99px; }
+div::-webkit-scrollbar-thumb { background: #4f46e5; border-radius: 99px; border: 2px solid #0f172a; }
+div::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+@keyframes floatP { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+@keyframes floatE { 0% { transform: translateY(0); } 100% { transform: translateY(-9px); } }
+
+/* ==========================================
+   🏰 ① オープニング・素性セッティング画面UI
+   ========================================== */
+#scr-prologue, #scr-setting {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: #000; color: #fff; font-family: monospace;
+    padding: 30px 20px; box-sizing: border-box; display: none; z-index: 10000;
+}
+.prologue-line {
+    font-size: 1.1rem; line-height: 2.2; color: #e2e8f0; margin-bottom: 20px;
+    animation: retroFadeIn 1s forwards; opacity: 0;
+}
+@keyframes retroFadeIn { to { opacity: 1; } }
+
+.setting-title {
+    font-size: 1.4rem; font-weight: bold; color: #eab308; text-align: center;
+    margin-bottom: 25px; border-bottom: 2px dashed #eab308; padding-bottom: 10px;
+}
+.class-card {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border: 2px solid #475569; border-radius: 12px; padding: 15px; margin-bottom: 16px;
+    cursor: pointer; transition: all 0.2s ease;
+}
+.class-card:hover {
+    border-color: #38bdf8; box-shadow: 0 0 15px rgba(56,189,248,0.4);
+    transform: translateY(-2px);
+}
+.class-name { font-size: 1.15rem; font-weight: bold; margin-bottom: 5px; }
+.class-desc { font-size: 0.85rem; color: #94a3b8; line-height: 1.5; }
+
+/* ==========================================
+   🥊 ② 敵通常攻撃：体当たり物理衝撃突進
+   ========================================== */
+@keyframes enemyAssault {
+    0% { transform: translateX(0); }
+    15% { transform: translateX(var(--assaultX, -140px)); filter: brightness(1.2); }
+    30% { transform: translateX(var(--assaultX, -140px)); }
+    100% { transform: translateX(0); }
+}
+
+/* ==========================================
+   ⚡ ③ ライトニング案A：リアル・チェインライトニング
+   ========================================== */
+/* ⚡ 1. ベースコンテナ（そのまま） */
+.anim-player-lightning-A {
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%; 
+    pointer-events: none; 
+    z-index: 1000;
+}
+
+/* 💥【新規追加】② 敵に当たった瞬間に激しく火花が散る放電エフェクト */
+.anim-player-lightning-A::before {
+    content: "";
+    position: absolute;
+    /* 敵のいる位置（画面右側の中央）に配置 */
+    top: 45%;
+    right: 20%;
+    width: 120px;
+    height: 120px;
+    transform: translate(50%, -50%) scale(0);
+    
+/* 🎨 黄色と白のプラズマグラデーション（元の色味をキープ） */
+    background: radial-gradient(circle, #e6e953 0%, #5e74d4 40%, rgba(228, 234, 235, 0) 70%);
+    
+    /* ⚡ 周囲に飛び散る電撃のネオン光（元の色味をキープ） */
+    box-shadow: 
+        0 0 40px #86c71e,
+        0 0 80px #1785b1;
+    
+    /* ❌ border-radius: 50%;（綺麗な丸）を完全に引き算しました */
+    
+    /* 💥【ここが最大のポイント】多角形（Polygon）を指定して、
+       数式で12個の頂点を作り、丸い光を「トゲトゲの爆発アイコンの形」に強制カット！ */
+    clip-path: polygon(
+        8% 90%, 62% 35%, 12% 4%, 75% 55%, 
+        76% 0%, 66% 12%, 6% 99%, 11% 44%, 
+        21% 4%, 3% 21% ,88% 0%, 62% 35%, 12% 84%, 75% 55%, 
+        76% 08%, 66% 12%, 86% 99%, 18% 44%, 
+        21% 48%, 83% 29%     
+    );
+            clip-path: polygon(
+        8% 0%, 62% 35%, 92% 4%, 7% 55%, 
+        76% 8%, 66% 12%, 86% 9%, 18% 44%, 
+        2% 8%, 83% 29%     
+    );
+                clip-path: polygon(
+        89% 90%, 62% 35%, 92% 4%, 97% 55%, 
+        76% 89%, 66% 12%, 86% 99%, 18% 44%, 
+        29% 89%, 83% 29%     
+    );
+    z-index: 12;
+    pointer-events: none;
+    
+    /* レーザーが敵に届く「0.15秒後」にジャストで合わせて爆発させる */
+    animation: enemyDischargeA 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+/* ⚡ 3. 主人公からの放電レーザー（left: 30% 反映版） */
+.anim-player-lightning-A::after {
+    content: ""; 
+    position: absolute; 
+    top: 35%;          
+    left: 30%;         /* 👈 調整してくれた 30% に固定 */
+    width: 0%; 
+    height: 24px;
+    
+    background: linear-gradient(180deg, #ffffff 0%, #facc15 30%, #eab308 70%, #ffffff 100%);
+    box-shadow: 
+        0 0 10px #ffffff,
+        0 0 30px #facc15, 
+        0 0 60px #eab308,
+        0 0 90px rgba(254, 240, 138, 0.7); 
+        
+    border-radius: 12px; 
+    z-index: 50;
+    transform-origin: left center; 
+    pointer-events: none; 
+    
+    animation: shootElectricLaserA 0.8s cubic-bezier(0.19, 1, 0.22, 1) forwards;
+}
+
+/* 💥 敵の放電アニメーション（レーザーの着弾に合わせてバチバチッと激しく点滅） */
+@keyframes enemyDischargeA {
+    0% { transform: translate(50%, -50%) scale(0); opacity: 0; }
+    /* 18%（約0.15秒後）: レーザー着弾！ここで一気に巨大化して激しく放電 */
+    18% { transform: translate(50%, -50%) scale(1.5); opacity: 1; filter: brightness(2); }
+    /* 35%: バリバリと2回目のパチパチ明滅 */
+    35% { transform: translate(50%, -50%) scale(1.2); opacity: 0.9; filter: brightness(1.2); }
+    50% { transform: translate(50%, -50%) scale(1.6); opacity: 1; filter: brightness(2.5); }
+    /* 後半: 火花が四方に霧散しながら消えていく */
+    75% { transform: translate(50%, -50%) scale(1.3); opacity: 0.6; }
+    100% { transform: translate(50%, -50%) scale(1); opacity: 0; }
+}
+
+/* ⚡ レーザーの軌道アニメーション（そのまま） */
+@keyframes shootElectricLaserA {
+    0% { width: 0%; right: 75%; opacity: 1; filter: brightness(1); transform: scaleY(1); }
+    25% { width: 65%; right: 12%; opacity: 1; transform: scaleY(1.1) skewY(3deg); }
+    50% { width: 65%; right: 12%; filter: brightness(2.5); transform: scaleY(1.5) skewY(-3deg); }
+    75% { width: 65%; right: 12%; opacity: 0.8; transform: scaleY(0.8) skewY(1deg); }
+    100% { width: 0%; right: 12%; opacity: 0; transform: scaleY(0) skewY(0deg); }
+}
+
+/* ==========================================
+   🐝 ④ ワスプ：サイズ極小化＆5匹サイン波乱舞
+   ========================================== */
+#wasp-swarm-box div { font-size: 1.3rem !important; }
+@keyframes beeWaveAttack5 {
+    0% { transform: translateX(0) translateY(0) scale(0.4); opacity: 0; }
+    15% { opacity: 1; transform: translateX(12vw) translateY(-70px) scale(1.1); }
+    45% { transform: translateX(32vw) translateY(60px) scale(0.9); }
+    75% { transform: translateX(55vw) translateY(-50px) scale(1.1); }
+    90% { opacity: 1; transform: translateX(68vw) translateY(20px) scale(1.0); }
+    100% { transform: translateX(75vw) translateY(0) scale(0.6); opacity: 0; }
+}
+
+/* ==========================================
+   📊 ① MP（マジックパワー）専用有線表示UI
+   ========================================== */
+#p-mp-text {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+    margin-top: 4px;
+    font-family: monospace;
+}
+
+
+/* ==========================================
+   🧪 プレイヤー直接発光・回復アニメーション
+   ========================================== */
+
+/* 🟢 回復薬（potion）：緑色発光キーフレーム */
+@keyframes playerGreenGlow {
+    0% { filter: brightness(1); }
+    30% { filter: sepia(1) hue-rotate(80deg) saturate(5) brightness(1.8) drop-shadow(0 0 20px #34d399); }
+    70% { filter: sepia(1) hue-rotate(80deg) saturate(5) brightness(1.8) drop-shadow(0 0 20px #34d399); }
+    100% { filter: brightness(1); }
+}
+
+/* 🔷 魔力の雫（mana）：青色発光キーフレーム */
+@keyframes playerBlueGlow {
+    0% { filter: brightness(1); }
+    30% { filter: sepia(1) hue-rotate(190deg) saturate(5) brightness(1.8) drop-shadow(0 0 20px #38bdf8); }
+    70% { filter: sepia(1) hue-rotate(190deg) saturate(5) brightness(1.8) drop-shadow(0 0 20px #38bdf8); }
+    100% { filter: brightness(1); }
+}
+
+/* 💡 発光適用クラス（!important で上書きを保護） */
+.heal-green-anim {
+    animation: playerGreenGlow 0.7s ease-in-out forwards !important;
+}
+
+.heal-blue-anim {
+    animation: playerBlueGlow 0.7s ease-in-out forwards !important;
+}
+
+/* ==========================================================================
+   🏰 OP画面（スタート画面）Tower02.jpg 背景特大化
+   ========================================================================== */
+#scr-start {
+    /* 背景画像を上下センターに配置 */
+    background: linear-gradient(rgba(15, 23, 42, 0.25), rgba(2, 6, 23, 0.55)), 
+                url("../assets/ui/Tower02.jpg") no-repeat center center !important;
+    background-size: cover !important;
+    border-radius: 20px;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8);
+    
+    /* 🌟 ここがポイント：高さを大きく取り、タイトルを上・ボタンを下に離して中央の塔を魅せる */
+    min-height: 480px;
+    padding: 30px 15px !important;
+    flex-direction: column;
+    justify-content: space-between; /* タイトルが上端、ボタンが下端に配置される */
+    align-items: center;
+}
+/* ==========================================================================
+   ⚔️ OP画面：重厚魔導プレートボタン
+   ========================================================================== */
+
+.op-enter-btn {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* 📐 20pxから10pxへスリム化＆改行完全阻止 */
+    padding: 10px 32px !important;
+    white-space: nowrap !important;
+    
+    /* 🎨 黒曜石グラデーション ＆ 金細工の二重枠 */
+    background: linear-gradient(180deg, #1e1b4b 0%, #090d16 100%) !important;
+    color: #f8fafc !important;
+    font-family: monospace, sans-serif;
+    font-size: 1.05rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.25em;
+    
+    /* 🗡️ 角を落としたシャープな枠線 */
+    border: 1px solid #eab308 !important;
+    border-radius: 4px !important;
+    outline: 1px solid rgba(234, 179, 8, 0.4);
+    outline-offset: -4px;
+    
+    /* 控えめで鋭いネオンの光彩 */
+    box-shadow: 0 0 12px rgba(234, 179, 8, 0.3), inset 0 0 10px rgba(99, 102, 241, 0.4), 0 6px 15px rgba(0, 0, 0, 0.8) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* ホバー時の魔力発光 */
+.op-enter-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    border-color: #fef08a !important;
+    box-shadow: 0 0 20px rgba(234, 179, 8, 0.6), inset 0 0 15px rgba(129, 140, 248, 0.6), 0 8px 20px rgba(0, 0, 0, 0.9) !important;
+}
+
+.op-enter-btn:active {
+    transform: translateX(-50%) translateY(1px);
+}
+/* ==========================================================================
+   ⚜️ 外枠（#sq-board）：ゴシック魔導コーナーオーナメント
+   ========================================================================== */
+#sq-board::before,
+#sq-board::after {
+    content: "❖";
+    position: absolute;
+    font-size: 1.1rem;
+    color: #eab308;
+    text-shadow: 0 0 8px rgba(234, 179, 8, 0.8);
+    pointer-events: none;
+    z-index: 10;
+    line-height: 1;
+}
+
+/* 左上と右下の紋章 */
+#sq-board::before {
+    top: 10px;
+    left: 12px;
+}
+
+/* 右上の紋章（ヘッダー右端のアクセント） */
+#sq-board::after {
+    bottom: 12px;
+    right: 14px;
+}
+/* ⚡ 敵用呪文エフェクト：立ち絵や枠はそのまま、エフェクトレイヤーだけを左右反転 */
+/* 立ち絵や全体は絶対に反転させず、エフェクトレイヤーだけを左右反転 */
+#dmg-layer.reverse-fx {
+    transform: scaleX(-1) !important;
+    transform-origin: center center !important;
+}
+
+/* 全員の位置を下へ */
+#p-sprite-graphic,
+#e-sprite-graphic {
+    /* 基本の下げ幅（ここを変えるだけで全員の高さが一括で変わる） */
+    --base-ground-y: 40px;
+
+    /* JSから指定される --offset-y と合算して移動 */
+    translate: 0 calc(var(--base-ground-y) + var(--offset-y, 0px));
+}

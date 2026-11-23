@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>スパイラルタワー 2</title>
+<link rel="stylesheet" href="css/style.css?v=1633">
+</head>
+<body class="game-body" style="margin:0 !important; padding:0 !important; background-color:#0f172a !important;">
+
+  <div class="master-wrapper" style="width:100% !important; max-width:600px !important; margin:0 auto !important; padding:15px !important; box-sizing:border-box !important;">
+    <div class="game-container" style="width:100% !important; box-sizing:border-box !important;">
+        
+<!-- 🏰 ゴシック＆魔導フレーム化した外枠（sq-board） -->
+<div id="sq-board" style="
+    background: linear-gradient(160deg, #111827 0%, #030712 100%) !important;
+    border: 4px solid #78350f !important;
+    outline: 2px solid #eab308 !important;
+    outline-offset: -8px;
+    border-radius: 24px !important;
+    padding: 20px 14px 25px 14px !important;
+    text-align: center !important;
+    box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), inset 0 0 25px rgba(0, 0, 0, 0.8), 0 0 15px rgba(234, 179, 8, 0.25) !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    position: relative;">
+
+ <!-- ⚜️ ヘッダー区切り（金細工のライン＆紋章風バッジ） -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid rgba(234, 179, 8, 0.35); width:100%; box-sizing:border-box;">
+        <div id="floor-indicator" style="font-size:1.05rem; font-weight:900; color:#fde047; background:rgba(30, 27, 75, 0.85); border:1px solid #ca8a04; padding:3px 14px; border-radius:6px; visibility:hidden; font-family:monospace; box-shadow:0 0 8px rgba(234,179,8,0.3);">🏛️ 1階</div>
+        <button onclick="toggleMute()" id="btn-mute" style="background:#0f172a; color:#cbd5e1; border:1px solid #475569; border-radius:6px; padding:6px 14px; font-size:0.9rem; font-weight:800; cursor:pointer; font-family:monospace;">🔊 音声: ON</button>
+    </div>
+
+    <div id="scr-start" style="position: relative; width: 100%; height: 490px; box-sizing: border-box; padding: 25px 10px 0 10px; text-align: center;">
+        
+        <!-- 👑 タイトルエリア（上部） -->
+        <div style="color: #a5b4fc; font-size: 1.05rem; font-weight: 900; letter-spacing: 0.4em; margin-bottom: 6px; text-shadow: 0 0 12px rgba(99,102,241,0.9); font-family: monospace;">
+            - LEGENDARY RPG -
+        </div>
+        <h1 style="color: #ffffff; font-size: 2.8rem; margin: 0; font-weight: 900; letter-spacing: -0.03em; line-height: 1.1; text-shadow: 0 0 25px rgba(129,140,248,0.9), 3px 3px 0 #000; font-family: monospace;">
+            The Spire of Spiral
+        </h1>
+
+        <!-- ⚔️ 塔へ侵入するボタン（既存のまま） -->
+        <button onclick="document.getElementById('scr-start').classList.add('is-hidden'); document.getElementById('scr-start').style.display='none'; nextStage();" class="op-enter-btn">
+            <span class="btn-text">⚔️ 塔へ侵入する</span>
+        </button>
+
+<!-- 📜 記憶復元紙（ロード）ボタン（小型・金枠内フィット版） -->
+    <button onclick="if(typeof window.openLoadPasswordModal==='function') window.openLoadPasswordModal();" style="position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 150px; height: 26px; background: rgba(15, 23, 42, 0.85); color: #cbd5e1; border: 1px solid #6366f1; border-radius: 4px; font-size: 0.78rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; box-sizing: border-box; font-family: monospace; z-index: 10; box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);">
+        <span style="font-size: 0.85rem;">📜</span><span>つづきから</span>
+    </button>
+    </div>
+
+            <div id="scr-intro" style="display:none; padding:20px 10px; width:100%; box-sizing:border-box;">
+                <div id="intro-ch-num" style="color:#f43f5e; font-size:1.5rem; font-weight:900; margin-bottom:10px;">FLOOR 01</div>
+                <h2 id="intro-ch-title" style="color:#0f172a; font-size:2.8rem; margin-bottom:30px; font-weight:900;">章のタイトル</h2>
+                <div style="background:#f1f5f9; border-radius:20px; padding:30px; margin-bottom:40px;">
+                    <p id="intro-text" style="color:#334155; font-size:1.5rem; font-weight:700; text-align:left;">状況説明テキスト</p>
+                </div>
+                <button onclick="startBattle()" style="background:#0f172a; color:white; border:none; border-radius:16px; padding:25px 45px; font-size:1.8rem; font-weight:900; cursor:pointer; width:100%; box-sizing:border-box;">魔物と対峙する</button>
+            </div>
+
+            <div id="scr-battle" style="display:none; width:100%; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:15px; gap:10px; width:100%;">
+                    <div style="flex:1; text-align:left;">
+                        <div id="p-name" style="font-size:1.15rem; font-weight:900; color:#f8fafc; text-shadow:0 0 8px rgba(56,189,248,0.6);">🧙‍♂️ ウィザード</div>
+                        <div style="background:#e2e8f0; border-radius:99px; height:16px; width:100%; overflow:hidden;">
+                            <div id="p-hp-bar" style="background:linear-gradient(90deg,#10b981,#34d399); height:100%; width:100%; transition: width 0.2s;"></div>
+                        </div>
+                       <div id="p-hp-txt" style="font-size:1rem; font-weight:900; color:#94a3b8; margin-top:2px;">HP: 100/100</div>
+                    </div>
+                    <div style="font-size:1.4rem; font-weight:900; color:#e11d48; line-height:2;">VS</div>
+                    <div style="flex:1; text-align:right;">
+                        <div id="e-name" style="font-size:1.15rem; font-weight:900; color:#f8fafc; text-shadow:0 0 8px rgba(244,63,94,0.6);">敵の名前</div>
+                        <div style="background:#e2e8f0; border-radius:99px; height:16px; width:100%; overflow:hidden;">
+                            <div id="e-hp-bar" style="background:linear-gradient(90deg,#f43f5e,#fb7185); height:100%; width:100%; transition: width 0.2s;"></div>
+                        </div>
+                        <div id="e-hp-txt" style="font-size:1rem; font-weight:900; color:#94a3b8; margin-top:2px;">HP: 100/100</div>
+                    </div>
+                </div>
+
+                <div id="eff-scr" style="background-color:#0f172a; border:4px solid #334155; border-radius:24px 24px 0 0; height:350px; width:100%; position:relative; overflow:hidden; box-sizing:border-box !important;">
+                    
+                    <div id="cutin-bar">
+                         <div class="cutin-text">🧙‍♂️ クリティカルヒット！！</div>
+                    </div>
+
+                    <div id="icon-stage" style="display:flex; justify-content:space-around; align-items:center; width:100%; height:100%; box-sizing:border-box !important; padding:0 15px;">
+                        <div id="p-sprite-container" style="width:130px; height:130px; animation: floatP 1.8s infinite alternate ease-in-out;">
+                            <img id="p-sprite-graphic" style="width:100%; height:100%; object-fit:contain; image-rendering:pixelated;" alt="Wizard">
+                        </div>
+                        <div id="e-sprite-container" style="width:180px; height:180px; animation: floatE 2.2s infinite alternate ease-in-out; transition: opacity 0.8s, transform 0.8s;">
+                            <img id="e-sprite-graphic" style="width:100%; height:100%; object-fit:contain; image-rendering:pixelated;" alt="Enemy">
+                        </div>
+                    </div>
+                    
+                    <div id="dmg-layer" style="position:absolute; width:100%; height:100%; top:0; left:0; pointer-events:none; z-index:7; box-sizing:border-box !important;"></div>
+                    <div id="charge-badge" style="position:absolute; top:15px; left:15px; background:linear-gradient(135deg,#e11d48,#4f46e5); color:#ffffff; font-size:1rem; font-weight:900; padding:4px 12px; border-radius:99px; display:none; z-index:6;">魔力解放：威力2.5倍</div>
+                    <div id="item-badge" style="position:absolute; top:15px; right:15px; background:#059669; color:white; font-size:0.9rem; font-weight:900; padding:4px 12px; border-radius:6px; display:none; z-index:6;">🛡 お守り結界中</div>
+                </div>
+
+                <div id="battle-log" style="background:rgba(15,23,42,0.98); color:#ffffff; font-size:1.2rem; font-weight:800; padding:15px; border-radius:0 0 24px 24px; border:4px solid #4f46e5; border-top:none; min-height:90px; box-sizing:border-box; text-align:left; width:100%;">コマンドを選択せよ。</div>
+
+                <div id="cmd-panel" style="margin-top:15px; width:100%; box-sizing:border-box; position:relative;">
+                    
+                    <div id="panel-main-mode" style="display:block; width:100%;">
+                        <div style="display:grid; grid-template-columns: 1fr; gap: 10px; width:100%; margin-bottom: 8px;">
+                            <button onclick="openMagicBag()" class="btn-main btn-magic-main" style="width:100%; height:64px; color:white; border:none; border-radius:14px; font-size:1.3rem; font-weight:900; cursor:pointer;">🔮 呪文を詠唱する</button>
+                        </div>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; width:100%;">
+                            <button onclick="turn('chg')" class="btn-main btn-charge-main" style="height:58px; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:900; cursor:pointer;">⚡ 魔力集中（チャージ）</button>
+                            <button onclick="openItemBag()" class="btn-main btn-item-main" style="height:58px; color:white; border:none; border-radius:12px; font-size:1.1rem; font-weight:900; cursor:pointer;">🎒 アイテム</button>
+                        </div>
+                    </div>
+
+                    <div id="panel-magic-mode" style="display:none; background:#1e293b; border:4px solid #6366f1; border-radius:16px; padding:12px; width:100%; box-sizing:border-box;">
+                        <div style="color:#facc15; font-size:0.95rem; font-weight:bold; margin-bottom:8px; text-align:center;">🔮 黒革の魔導書</div>
+                        
+                        <div style="max-height:190px; overflow-y:auto; padding-right:4px; margin-bottom:10px; box-sizing:border-box;">
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width:100%;">
+        <button onclick="turn('fire')" style="background:linear-gradient(135deg,#e11d48,#f43f5e); color:white; border:none; border-radius:10px; padding:8px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🔥 ファイア</button>
+        <button onclick="turn('wasp2')" style="background:linear-gradient(135deg,#0284c7,#38bdf8); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">❄️ フリーズ</button>
+                              <button onclick="turn('scis')" style="background:linear-gradient(135deg,#475569,#94a3b8); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">✂️ シザース</button>
+                                <button onclick="turn('drai')" style="background:linear-gradient(135deg,#be123c,#fb7185); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🩸 ドレイン</button>
+                                <button onclick="turn('flod')" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🌊 フラッド</button>
+    <button onclick="turn('mete')" style="background:linear-gradient(135deg,#991b1b,#ef4444); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🌋 メテオ</button>
+                                <button onclick="turn('aero')" style="background:linear-gradient(135deg,#047857,#34d399); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🌪️ エアロ</button>
+                                <button onclick="turn('come')" style="background:linear-gradient(135deg,#4338ca,#a5b4fc); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">☄️ コメット</button>
+                               <button onclick="turn('wasp')" style="background:linear-gradient(135deg,#b45309,#f59e0b); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🐝 ワスプ</button>
+                                <button onclick="turn('scre')" style="background:linear-gradient(135deg,#6d28d9,#a78bfa); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">📢 スクリーム</button>
+                                <button onclick="turn('quak')" style="background:linear-gradient(135deg,#78350f,#b45309); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🪨 クエイク</button>
+                                <button onclick="turn('def')" style="background:linear-gradient(135deg,#059669,#10b981); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🛡️ シールド</button>            
+                                
+
+ 
+                                <button onclick="turn('flas')" style="background:linear-gradient(135deg,#ea580c,#fdba74); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">☀️ フラッシュ</button>
+         <button onclick="turn('ice')" style="display: none; background: linear-gradient(135deg, #0284c7, #38bdf8); color: white; border: none; border-radius: 10px; padding: 14px 2px; font-size: 1rem; font-weight: 900; cursor: pointer;">❄️ アイス</button>
+                                <button onclick="turn('holy')" style="background:linear-gradient(135deg,#ca8a04,#facc15); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">✨ ホーリー</button>
+
+                                <button onclick="turn('refl')" style="background:linear-gradient(135deg,#0369a1,#7dd3fc); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🪞 リフレク</button>
+                                <button onclick="turn('wisp')" style="background:linear-gradient(135deg,#0d9488,#5eead4); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🧚 ウィスプ</button>
+                                <button onclick="turn('mmis')" style="background:linear-gradient(135deg,#4338ca,#818cf8); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🚀 マジックミサイル</button>
+                                <button onclick="turn('slow')" style="background:linear-gradient(135deg,#f59e0b,#fef08a); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">⏳ スロウ</button>
+                                <button onclick="turn('bio')" style="display: none;" background:linear-gradient(135deg,#15803d,#4ade80); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🧪 バイオ</button>
+                                <button onclick="turn('slee')" style="background:linear-gradient(135deg,#0369a1,#38bdf8); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">💤 スリープ</button>
+                                <button onclick="turn('dead')" style="background:linear-gradient(135deg,#111827,#4b5563); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">💀 デス</button>
+                                <button onclick="turn('grav')" style="background:linear-gradient(135deg,#312e81,#6366f1); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🧬 グラビデ</button>
+                                <button onclick="turn('anal')" style="background:linear-gradient(135deg,#0f766e,#2dd4bf); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">🔮 アナライズ</button>
+                                <button onclick="turn('ulti')" style="background:linear-gradient(135deg,#701a75,#f472b6); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">👑 アルテマ</button>
+                        <button onclick="turn('ele')" style="background:linear-gradient(135deg,#ca8a04,#eab308); color:white; border:none; border-radius:10px; padding:14px 2px; font-size:1rem; font-weight:900; cursor:pointer;">⚡ ライトニング</button>
+                            </div>
+                        </div>
+                        
+                        <button onclick="closeMagicBag()" style="width:100%; height:38px; background:#475569; color:white; border:none; font-weight:bold; border-radius:8px; cursor:pointer;">↩️ 行動選択に戻る</button>
+                    </div>
+                    
+                    <div id="item-bag-panel" style="display:none; background:#1e293b; border:4px solid #d97706; border-radius:16px; padding:12px; width:100%; flex-direction:column; box-sizing:border-box;">
+                        <div style="color:#fb923c; font-size:0.95rem; font-weight:bold; margin-bottom:8px; text-align:center;">🎒 なめし皮の道具袋</div>
+                        
+                        <div style="max-height:190px; overflow-y:auto; padding-right:4px; margin-bottom:10px; box-sizing:border-box; width:100%;">
+                            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width:100%;">
+                                <button onclick="useItem('potion')" id="item-slot-potion" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🧪 ポーション</button>
+                                <button onclick="useItem('amulet')" id="item-slot-amulet" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🧿 お守り</button>
+                                <button onclick="useItem('elix')" id="item-slot-elix" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🧪 エリクサー</button>
+                                <button onclick="useItem('bomb')" id="item-slot-bomb" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">💣 魔法の爆弾</button>
+                                <button onclick="useItem('cure')" id="item-slot-cure" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🧪 万能薬</button>
+                                <button onclick="useItem('hour')" id="item-slot-hour" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">⏳ 時の砂時計</button>
+                                <button onclick="useItem('whet')" id="item-slot-whet" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🗡️ 研ぎ石</button>
+                                <button onclick="useItem('mirr')" id="item-slot-mirr" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🪞 鏡の破片</button>
+                                <button onclick="useItem('mana')" id="item-slot-mana" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🔷 魔力の雫</button>
+                                <button onclick="useItem('scro')" id="item-slot-scro" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">📜 賢者の巻物</button>
+                                <button onclick="useItem('smok')" id="item-slot-smok" style="background:#0f172a; color:white; border:1px solid #475569; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🌀 煙幕弾</button>
+                                <button onclick="useItem('wing')" id="item-slot-wing" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🪶 ハピの羽根</button>
+                                <button onclick="useItem('web')"  id="item-slot-web"  style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🕸️ 蜘蛛の糸</button>
+                                <button onclick="useItem('bone')" id="item-slot-bone" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🦴 骸骨の骨</button>
+                                <button onclick="useItem('ston')" id="item-slot-ston" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🪨 ゴレムの石</button>
+                                <button onclick="useItem('cand')" id="item-slot-cand" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🕯️ 霊体の蝋燭</button>
+                                <button onclick="useItem('jewe')" id="item-slot-jewe" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">💎 目玉の宝石</button>
+                                <button onclick="useItem('hone')" id="item-slot-hone" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🍯 黄金の蜜</button>
+                                <button onclick="useItem('spor')" id="item-slot-spor" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🍄 幻覚胞子</button>
+                                <button onclick="useItem('scal')" id="item-slot-scal" style="background:#1e293b; color:#38bdf8; border:1px solid #38bdf8; padding:14px 2px; font-weight:bold; border-radius:10px; cursor:pointer; font-size:1rem;">🐉 竜の逆鱗</button>
+                              
+                            </div>
+                        </div>
+                        
+                        <button onclick="closeItemBag()" style="width:100%; height:38px; background:#7f1d1d; color:white; border:none; font-weight:bold; border-radius:8px; cursor:pointer;">✕ 行動選択に戻る</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="scr-result" style="display:none; padding:35px 10px; width:100%; box-sizing:border-box;">
+                <div id="res-icon" style="font-size:90px; margin-bottom:15px;">🏆</div>
+               <h2 id="res-title" style="color:#fde047 !important; font-size:3rem; font-weight:900; margin-bottom:15px; text-shadow:0 0 20px rgba(234,179,8,0.8), 2px 2px 0 #000; font-family:monospace;">VICTORY</h2>
+               <div style="background:rgba(15,23,42,0.85); border:1px solid #334155; border-radius:20px; padding:25px; box-sizing:border-box; width:100%; box-shadow:0 0 20px rgba(0,0,0,0.6);">
+        <p id="res-text" style="color:#f1f5f9; font-size:1.15rem; font-weight:800; line-height:1.7; text-align:left; margin:0; min-height:80px;"></p>
+    </div>
+               <button id="res-btn" onclick="nextStage()" style="background:linear-gradient(135deg, #1e1b4b, #312e81); color:#ffffff; border:1px solid #eab308; border-radius:12px; padding:16px 40px; font-size:1.3rem; font-weight:900; cursor:pointer; width:100%; margin-top:20px; box-sizing:border-box; box-shadow:0 0 15px rgba(234,179,8,0.3); font-family:monospace;"></button>
+</div>
+        </div>
+    </div>
+
+   <div id="dev-console-window" style="margin-top:25px; width:100%; background:#0b0f19; border:2px solid #334155; border-radius:16px; padding:15px; text-align:left; box-sizing:border-box;">
+        <div style="font-size:0.9rem; font-weight:800; color:#94a3b8; margin-bottom:10px; display:flex; justify-content:space-between;">
+            <span>🔧 開発者コンソール (PW「1192」)</span>
+            <span id="dev-status-badge" style="color:#ef4444; font-weight:900;">LOCKED</span>
+</div>
+        <input type="password" id="dev-password-input" oninput="checkDevPassword()" autocomplete="new-password" placeholder="PASSWORDを入力..." style="width:100%; background:#1e293b; color:#ffffff; border:1px solid #475569; border-radius:8px; padding:10px; font-size:1rem; box-sizing:border-box; outline:none;">
+    </div>  
+    
+    <div style="width:100%; display:flex; justify-content:space-between; color:#64748b; font-size:0.8rem; margin-top:20px; font-weight:bold; padding:0 5px;">
+        <span>改訂 V8.10（全開通版037）</span>
+        <span>Update: 2026.05.28 07:35:00</span>
+    </div>
+
+<div id="boss-frame"></div>
+<div id="boss-title">⚠️ WARNING: FLOOR BOSS ⚠️</div>
+
+<style>
+/* 🟥 1. 戦闘ウィンドウに限定した光る赤枠 */
+#boss-frame {
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; 
+    z-index: 10; 
+    box-sizing: border-box;
+    border: 8px solid transparent; 
+    border-radius: 20px 20px 0 0; 
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, border-color 0.5s;
+}
+
+/* 🔥 ボス出現時：ボケ幅を引き締め、エッジを鋭くした警告レイザー赤枠 */
+#boss-frame.is-active {
+    opacity: 1;
+    border-color: rgba(255, 0, 0, 1.0); /* 完全に不透明な赤にしてクッキリ */
+    
+    /* ⚡【ボケ幅の修正】：15pxや30pxなどの狭い範囲で「濃い赤」を重ねることで、モヤモヤ感を消して強烈に発光させます */
+    box-shadow: 
+        0 0 15px rgba(255, 0, 0, 1.0),                  /* 外側への鋭い光 */
+        0 0 30px rgba(255, 0, 0, 0.7),                  /* 外側への少し広い光 */
+        inset 0 0 15px rgba(255, 0, 0, 1.0),            /* 内側への鋭い光 */
+        inset 0 0 30px rgba(255, 0, 0, 0.7);            /* 内側への少し広い光 */
+        
+    animation: bossAlertPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes bossAlertPulse {
+    0% { opacity: 0.8; }
+    100% { opacity: 1.0; }
+}
+
+/* 💀 画面上部20%の位置に完全固定される警告タイトル */
+#boss-title {
+    position: fixed; 
+    top: 20% !important; 
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; 
+    color: #ffffff; /* 💡【超重要】：文字そのものを「純白」にすることで、赤文字より圧倒的にハッキリ読めるようになります！ */
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    font-size: 2.8rem;
+    font-weight: bold;
+    letter-spacing: 4px;
+    
+    /* ⚡【文字のクッキリ化】：文字本体を白にし、その周りを「ボケていない1px〜3pxの超濃い赤」でガチガチに縁取り（ストローク）します */
+    text-shadow: 
+        -2px -2px 0 #ff0000,  2px -2px 0 #ff0000,
+        -2px  2px 0 #ff0000,  2px  2px 0 #ff0000, /* 1. まず全方向に赤の硬い輪郭を作る */
+        0 0 10px #ff0000, 0 0 20px #ff0000,        /* 2. その外側にじんわり赤のネオンを出す */
+        0 0 5px #000000;                           /* 3. 隠し味に最背面に黒を置いて文字を浮き立たせる */
+        
+    z-index: 99999;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* クラスがついた瞬間だけ表示 */
+#boss-title.is-active {
+    opacity: 1; 
+}
+</style>
+
+<script>
+(function() {
+    let hasPlayedBossSE = false;
+    let bossTitleTimer = null; // 2秒タイマーを管理する変数
+
+    function checkBossLogic() {
+        const frame = document.getElementById("boss-frame");
+        const title = document.getElementById("boss-title");
+        const battleScreen = document.getElementById("scr-battle"); 
+        const floorIndicator = document.getElementById("floor-indicator"); 
+        // 🟢【ウィンドウ限定】親要素となる戦闘画像エリアを取得
+        const effScr = document.getElementById("eff-scr"); 
+
+        if (!frame || !title || !battleScreen || !floorIndicator || !effScr) return;
+
+        // 🟢【ウィンドウ限定】赤枠を画面全体(body)から、戦闘画像エリア(#eff-scr)の中へ移動させる
+        if (frame.parentNode !== effScr) {
+            effScr.appendChild(frame);
+        }
+
+        // 戦闘画面が表示されていなければ、すべてを完全に初期化
+        if (battleScreen.style.display === "none") {
+            frame.classList.remove("is-active");
+            title.classList.remove("is-active");
+            hasPlayedBossSE = false;
+            if (bossTitleTimer) { clearTimeout(bossTitleTimer); bossTitleTimer = null; }
+            return;
+        }
+
+        try {
+            // HTMLの階層表示バッジから数字を抜き出す
+            const floorText = floorIndicator.textContent || floorIndicator.innerText;
+            const currentFloor = parseInt(floorText.replace(/[^0-9]/g, ""), 10);
+            
+            // 10, 20, 30... 階のボスだった場合
+            if (!isNaN(currentFloor) && currentFloor % 10 === 0 && currentFloor !== 0) {
+                
+// 1. 赤枠の起動（ついていなければ）
+                if (!frame.classList.contains("is-active")) {
+                    frame.classList.add("is-active");
+                    
+                    // 2. タイトルの起動と「2秒後に消す」タイマーのセット
+                    title.classList.add("is-active");
+                    if (bossTitleTimer) clearTimeout(bossTitleTimer);
+                    bossTitleTimer = setTimeout(() => {
+                        title.classList.remove("is-active"); // ⚡ 2秒後に文字だけスッと消滅
+                    }, 2000);
+                }
+
+                // 3. 🎵 サウンド演出（地割れ＋落雷）を同時に1回だけ再生！
+                if (!hasPlayedBossSE) {
+                    hasPlayedBossSE = true; 
+
+                    if (typeof startBGM === 'function') startBGM("boss"); // 👈 この1行をここに追加！
+
+                    // ミュート状態のチェック
+                    const muteBtn = document.getElementById("btn-mute");
+                    const isMuted = muteBtn && muteBtn.textContent.includes("OFF");
+
+                    if (!isMuted) {
+                        // アセットパスの生成（関数がない場合は直リンクへフォールバック）
+                        let shakePath = typeof getAssetPath === 'function' ? getAssetPath('se_clean', 'se_earthshake.mp3') : "";
+                        let thunderPath = typeof getAssetPath === 'function' ? getAssetPath('se_clean', 'se_lightning01.mp3') : "";
+                        
+                        if (!shakePath) shakePath = "https://shadow-monk.github.io/spiral-tower2/assets/se/se_earthshake.mp3";
+                        if (!thunderPath) thunderPath = "https://shadow-monk.github.io/spiral-tower2/assets/se/se_lightning01.mp3";
+
+                        // 地割れ音再生
+                        const seShake = new Audio(shakePath);
+                        seShake.volume = 0.5;
+                        seShake.play().catch(e => {});
+
+                        // 落雷音再生
+                        const seThunder = new Audio(thunderPath);
+                        seThunder.volume = 0.5;
+                        seThunder.play().catch(e => {});
+                    }
+                }
+                return;
+            }
+
+            // 通常フロアなら演出を外す
+            frame.classList.remove("is-active");
+            title.classList.remove("is-active");
+            hasPlayedBossSE = false;
+            if (bossTitleTimer) { clearTimeout(bossTitleTimer); bossTitleTimer = null; }
+
+        } catch(e) {
+            // エラー対策
+        }
+    }
+
+    // 0.1秒ごとに自動パトロール
+    setInterval(checkBossLogic, 100);
+})();
+</script>
+
+
+
+<script src="js/stages.js?v=2000"></script>
+<script src="js/audio.js?v=05271817"></script>
+<script src="js/ui.js?v=807"></script>
+<script src="js/spell.js"></script>
+<script src="js/enemies.js?v=05272027"></script>
+
+<script src="js/main.js?v=05270429"></script>
+<script src="js/battle.js?v=037"></script>
+<script src="js/view.js?v=1"></script>
+<script src="js/item.js"></script>
+<script src="js/save.js"></script>
+
+
+</body>
+</html>
+
+
+
+<!--
+* **【１】共通土台・ヘッダー**：階層表示（`#floor-indicator`）や消音ボタン（`#btn-mute`）を常時最上部に配置。
+* **【２】起動画面 (`#scr-start`)**：あらすじを読み「塔へ侵入する」ボタンで次へ進む。
+* **【３】導入画面 (`#scr-intro`)**：章題や説明を挟み、「魔物と対峙する」で戦闘へ移行。
+* **【４】戦闘画面 (`#scr-battle`)**：HPバー、画像浮遊ステージ、ログ、呪文/アイテムのコマンド群が詰まった主戦場。※自称は「ウィザード」で直書き固定。
+* **【５】結果画面 (`#scr-result`)**：勝敗を表示し、次階へ進む。
+* **【６】コンソール**：パスワード（1192）で開く開発者用の裏画面。
+＊＊＊＊＊
+🏛️ 【大項目１】ゲーム画面の土台・共通ヘッダー（最上部）
+ゲーム全体の枠組みと、戦闘中も常に一番上に表示されている共通のエリアです。
+#sq-board：ゲーム全体の白い大きなゲーム盤（コンテナ）です。
+#floor-indicator：「1階」などの現在の階層を表示するバッジです。
+#btn-mute：「🔊 音声: ON」のミュート切り替えボタンです。
+🏁 【大項目２】#scr-start：タイトル・スタート画面
+ゲーム起動時に最初にドカンと表示されている、「塔へ侵入する」ボタンがある画面です。
+世界観テキスト：スパイラルタワーのストーリーがここに直書きされています。
+ボタン：クリックすると、このスタート画面を非表示（none）にして、次の処理（nextStage()）へと進みます。
+📖 【大項目３】#scr-intro：フロア進入時の状況説明画面
+戦闘に入る一歩手前で、「章のタイトル」や「状況説明テキスト」を表示してプレイヤーの気分を盛り上げる中間画面です。
+「魔物と対峙する」ボタンを押すことで、いよいよ戦闘（startBattle()）へと移行します。
+⚔️ 【大項目４】#scr-battle：戦闘メイン画面（★現在の主戦場）
+HPバーやコマンドボタンがズラリと並ぶ、ゲームの核心部分す。この中にさらに4つの重要なパーツが仕込まれています。
+
+① ステータス＆HPバー（最上段）
+左側（プレイヤー）：ここに 🧙‍♂️ ウィザード という文字が、JavaScriptからの連動ではなく、HTMLに直接「生文字」で固定されて書き込まれている のを発見しました！
+
+右側（敵）：#e-name というIDがついており、JavaScriptから動的に「ブラッドスパイダー」などの名前が流し込める配線になっています。
+
+② #eff-scr：戦闘グラフィックステージ
+#cutin-bar：「クリティカルヒット！！」などのカットイン演出が入る黒い帯です。
+
+#p-sprite-container / #e-sprite-container：プレイヤーとモンスターのドット絵（画像）を配置し、フワフワ浮遊させるアニメーション（floatP, floatE）をさせている部屋です。
+
+③ #battle-log：バトルログ
+「コマンドを選択せよ。」などのメッセージを表示するテキストエリアです。
+
+④ #cmd-panel：コマンド操作パネル
+**メインメニュー：「🔮 呪文を詠唱する」「⚡ 魔力集中」「🎒 アイテム」の3大ボタンです。**
+
+#panel-magic-mode：全25種類の呪文ボタンが上下スクロールでギッシリ詰まった魔導書パネルです（「ワスプ」や「スリープ」もここにあります）。
+
+#item-bag-panel：全20種類のアイテムボタンが詰まった道具袋パネルです。
+
+🏆 【大項目５】#scr-result：リザルト画面
+戦闘勝利時に「VICTORY」の文字とトロフィー（🏆）を表示し、次の階層（nextStage()）へ進むための結果発表画面です。
+
+🔧 【大項目６】#dev-console-window：開発者コンソール　 -->
