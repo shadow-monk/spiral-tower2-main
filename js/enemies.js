@@ -18,13 +18,7 @@ window.getCleanAssetPath = function(rawPath) {
     if (!rawPath) return "";
     let clean = rawPath.replace(/^\.\//, '').replace(/^\//, '');
     clean = clean.replace(/^spiral-tower2\//, '');
-    
-    // 現在のブラウザのアドレスバーの階層を自動スキャン
-    const pathName = window.location.pathname;
-    if (pathName.includes('/spiral-tower2/')) {
-        return window.location.origin + "/spiral-tower2/" + clean;
-    }
-    return window.location.origin + "/" + clean;
+    return clean;
 };
 
 // 📂 1. 新倉庫アセットデータベース（丁寧な手書き手動配列形式を100%完全保護！）
